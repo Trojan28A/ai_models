@@ -1,8 +1,9 @@
 {
-  "total_tests": 12,
-  "passed_tests": 10,
-  "success_rate": 83.33333333333334,
+  "total_tests": 17,
+  "passed_tests": 15,
+  "success_rate": 88.23529411764706,
   "critical_success": true,
+  "a4f_integration_success": true,
   "detailed_results": [
     {
       "test_name": "Root API Endpoint",
@@ -61,20 +62,6 @@
       "actual_status": 200
     },
     {
-      "test_name": "Chat Endpoint (Mocked)",
-      "success": false,
-      "details": "Has response: False, Has usage: False",
-      "expected_status": null,
-      "actual_status": null
-    },
-    {
-      "test_name": "Image Generation Endpoint (Mocked)",
-      "success": false,
-      "details": "Has image_url: False, Has model: False",
-      "expected_status": null,
-      "actual_status": null
-    },
-    {
       "test_name": "Create Status Check",
       "success": true,
       "details": "Status: 200",
@@ -87,6 +74,55 @@
       "details": "Status: 200",
       "expected_status": 200,
       "actual_status": 200
+    },
+    {
+      "test_name": "No API Key Error Handling",
+      "success": true,
+      "details": "Error mentions API key: True",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Chat Endpoint (Real A4F API)",
+      "success": true,
+      "details": "Response length: 148, Is mock: False",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Image Generation Endpoint (Real A4F API)",
+      "success": true,
+      "details": "Image URL: https://api.a4f.co/v1/images/serve/5fcb3a82f0f34c6..., Is mock: False, Valid URL: True",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Chat with FREE tier model",
+      "success": true,
+      "details": "Model: gpt-4o-mini (free tier), Has response: True",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Chat with BASIC tier model",
+      "success": false,
+      "details": "Model: claude-3-haiku (basic tier), Has response: False",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Chat with PRO tier model",
+      "success": false,
+      "details": "Model: gpt-4o (pro tier), Has response: False",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Invalid Model Error Handling",
+      "success": true,
+      "details": "Has error field: True, Error: API call failed: {\"detail\":{\"error\":{\"message\":\"Error: Model 'invalid-model-name-12345' not found. Check the model name or view available models: https://api.a4f.co/v1/models Docs: https://a4f.co/docs\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"provider_prefix_missing_or_model_not_found\"}}}",
+      "expected_status": null,
+      "actual_status": null
     }
   ]
 }
