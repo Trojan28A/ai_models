@@ -5,20 +5,34 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Image as ImageIcon, Loader2, Download, Trash2, RefreshCw } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { ArrowLeft, Image as ImageIcon, Loader2, Download, Trash2, RefreshCw, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import Header from "./Header";
+import ModelSelector from "./ModelSelector";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const ImagePlayground = () => {
   const location = useLocation();
-  const model = location.state?.model;
+  const initialModel = location.state?.model;
+  const [selectedModel, setSelectedModel] = useState(initialModel);
   const [prompt, setPrompt] = useState("");
+  const [negativePrompt, setNegativePrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [generatedImages, setGeneratedImages] = useState([]);
   const [apiKey, setApiKey] = useState("");
+  
+  // Image generation options
+  const [aspectRatio, setAspectRatio] = useState("1:1");
+  const [quality, setQuality] = useState("standard");
+  const [style, setStyle] = useState("");
+  const [cfgScale, setCfgScale] = useState([7.0]);
+  const [steps, setSteps] = useState([20]);
+  const [seed, setSeed] = useState("");
 
   useEffect(() => {
     fetchApiKey();
