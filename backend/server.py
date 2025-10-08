@@ -779,7 +779,7 @@ async def generate_audio(request: AudioModelRequest):
 
 @api_router.post("/generate-video")
 async def generate_video(request: VideoModelRequest):
-    """Generate video with a model (placeholder for future implementation)"""
+    """Generate video with enhanced options"""
     try:
         # Get API key from request or stored keys
         api_key = request.api_key
@@ -798,15 +798,73 @@ async def generate_video(request: VideoModelRequest):
                 }
             }
         
-        # Check if video generation is supported (placeholder)
-        return {
-            "error": {
-                "type": "feature_not_implemented", 
-                "message": "🎥 Video generation is not yet supported.",
-                "suggestion": "This feature is coming soon. Please check back later.",
-                "action": "wait_for_feature"
+        # Get the full model ID with provider prefix
+        full_model_id = await get_full_model_id(request.model_id, request.provider_id)
+        
+        # Convert aspect ratio to resolution if needed
+        if request.aspect_ratio:
+            aspect_ratios = {
+                "16:9": "1920x1080",
+                "9:16": "1080x1920",
+                "1:1": "1024x1024",
+                "4:3": "1024x768"
             }
+            resolution = aspect_ratios.get(request.aspect_ratio, request.resolution)
+        else:
+            resolution = request.resolution
+        
+        # Make real API call to A4F for video generation
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
         }
+        
+        payload = {
+            "model": full_model_id,
+            "prompt": request.prompt,
+            "size": resolution,
+            "duration": request.duration,
+        }
+        
+        # Add optional parameters
+        if request.fps:
+            payload["fps"] = request.fps
+        if request.style:
+            payload["style"] = request.style
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                "https://api.a4f.co/v1/videos/generations",
+                json=payload,
+                headers=headers
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    # Check if response has the video URL or generation ID
+                    if "data" in data and len(data["data"]) > 0:
+                        video_data = data["data"][0]
+                        return {
+                            "success": True,
+                            "video_url": video_data.get("url") or video_data.get("video_url"),
+                            "thumbnail_url": video_data.get("thumbnail"),
+                            "model": request.model_id,
+                            "resolution": resolution,
+                            "duration": request.duration,
+                            "fps": request.fps,
+                        }
+                    else:
+                        return {
+                            "success": True,
+                            "video_url": data.get("url") or data.get("video_url"),
+                            "model": request.model_id,
+                            "resolution": resolution,
+                            "duration": request.duration,
+                        }
+                else:
+                    error_text = await response.text()
+                    error_info = parse_a4f_error(error_text)
+                    return {"error": error_info, "status_code": response.status}
         
     except Exception as e:
         logger.error(f"Error in video generation: {str(e)}")
