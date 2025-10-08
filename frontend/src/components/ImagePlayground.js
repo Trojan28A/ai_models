@@ -368,8 +368,8 @@ const ImagePlayground = () => {
               </CardContent>
             </Card>
 
-          {/* Generated Images Gallery */}
-          <Card className="lg:col-span-2">
+            {/* Generated Images Gallery */}
+            <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
