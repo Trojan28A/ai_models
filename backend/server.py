@@ -275,18 +275,44 @@ async def generate_image(request: ModelRequest):
         if not api_key:
             return {"error": "No API key provided. Please add your A4F API key in settings."}
         
-        # Mock response for image generation
-        return {
-            "image_url": "https://picsum.photos/512/512",
+        # Make real API call to A4F for image generation
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
             "model": request.model_id,
             "prompt": request.prompt,
-            "width": 512,
-            "height": 512
+            "n": 1,
+            "size": "512x512"
         }
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                "https://api.a4f.co/v1/images/generations", 
+                headers=headers, 
+                json=payload
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if "data" in data and len(data["data"]) > 0:
+                        return {
+                            "image_url": data["data"][0]["url"],
+                            "model": request.model_id,
+                            "prompt": request.prompt,
+                            "width": 512,
+                            "height": 512
+                        }
+                    else:
+                        return {"error": "No image generated"}
+                else:
+                    error_text = await response.text()
+                    return {"error": f"Image generation failed: {error_text}"}
     
     except Exception as e:
         logger.error(f"Error in image generation: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error in image generation: {str(e)}")
+        return {"error": f"Error in image generation: {str(e)}"}
 
 # Include the router in the main app
 app.include_router(api_router)
