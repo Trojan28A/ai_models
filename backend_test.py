@@ -700,7 +700,7 @@ class AIModelsHubTester:
 
     def run_all_tests(self):
         """Run all backend tests"""
-        print("🚀 Starting AI Models Hub Backend Tests - A4F API Integration")
+        print("🚀 Starting Enhanced A4F Playground Backend Tests")
         print(f"Testing against: {self.base_url}")
         print("=" * 60)
 
@@ -717,6 +717,14 @@ class AIModelsHubTester:
         # Test status endpoints
         status_ok = self.test_status_endpoints()
         
+        print("\n🔥 ENHANCED A4F PLAYGROUND FEATURES:")
+        print("-" * 40)
+        
+        # Test enhanced features
+        enhanced_error_ok = self.test_enhanced_error_handling()
+        enhanced_text_ok = self.test_enhanced_text_generation()
+        enhanced_image_ok = self.test_enhanced_image_generation()
+        
         print("\n🔥 CRITICAL A4F API INTEGRATION TESTS:")
         print("-" * 40)
         
@@ -731,12 +739,19 @@ class AIModelsHubTester:
         print("=" * 60)
         print(f"📊 Tests completed: {self.tests_passed}/{self.tests_run} passed")
         
-        # Determine overall success - focus on A4F API integration
+        # Determine overall success - focus on enhanced features and A4F API integration
         critical_tests = [root_ok, models_ok, plans_ok]
+        enhanced_features = [enhanced_error_ok, enhanced_text_ok, enhanced_image_ok]
         a4f_integration_tests = [chat_real_ok, image_real_ok, auth_ok]
         
         critical_success = all(critical_tests)
+        enhanced_success = all(enhanced_features)
         a4f_success = all(a4f_integration_tests)
+        
+        print(f"\n🎯 Enhanced Features Status:")
+        print(f"   Enhanced Error Handling: {'✅' if enhanced_error_ok else '❌'}")
+        print(f"   Enhanced Text Generation: {'✅' if enhanced_text_ok else '❌'}")
+        print(f"   Enhanced Image Generation: {'✅' if enhanced_image_ok else '❌'}")
         
         print(f"\n🎯 A4F API Integration Status:")
         print(f"   Chat API: {'✅' if chat_real_ok else '❌'}")
@@ -746,10 +761,12 @@ class AIModelsHubTester:
         print(f"   Plan Restrictions: {'✅' if plan_restrictions_ok else '❌'}")
         print(f"   Error Handling: {'✅' if error_handling_ok else '❌'}")
         
-        if critical_success and a4f_success:
-            print("\n✅ All critical tests passed! A4F API integration is working correctly.")
+        if critical_success and enhanced_success and a4f_success:
+            print("\n✅ All critical tests passed! Enhanced A4F playground is working correctly.")
         else:
             print("\n❌ Some critical tests failed!")
+            if not enhanced_success:
+                print("   🚨 Enhanced features issues detected!")
             if not a4f_success:
                 print("   🚨 A4F API integration issues detected!")
             
@@ -758,6 +775,7 @@ class AIModelsHubTester:
             "passed_tests": self.tests_passed,
             "success_rate": (self.tests_passed / self.tests_run) * 100 if self.tests_run > 0 else 0,
             "critical_success": critical_success,
+            "enhanced_features_success": enhanced_success,
             "a4f_integration_success": a4f_success,
             "detailed_results": self.test_results
         }
