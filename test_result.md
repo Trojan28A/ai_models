@@ -222,8 +222,9 @@
 
 ## test_plan:
   current_focus:
-    - "Fix A4F API authentication for chat endpoint"
-    - "Fix A4F API authentication for image generation endpoint"
+    - "Enhanced error handling and user feedback"
+    - "Advanced text generation parameters"
+    - "Enhanced image generation options"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
