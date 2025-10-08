@@ -605,7 +605,11 @@ class AIModelsHubTester:
                 data = response.json()
                 has_error = 'error' in data
                 if has_error:
-                    error_msg = data['error']
+                    error_obj = data['error']
+                    if isinstance(error_obj, dict):
+                        error_msg = error_obj.get('message', '')
+                    else:
+                        error_msg = str(error_obj)
                     is_plan_restriction = 'not available for your current plan' in error_msg
                     is_rate_limit = 'exceeded your requests' in error_msg
                     
