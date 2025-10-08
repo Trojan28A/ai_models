@@ -57,6 +57,16 @@ const Home = () => {
   const filteredModels = models ? (() => {
     let filtered = models.models || [];
     
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(model => 
+        model.name.toLowerCase().includes(query) ||
+        model.description?.toLowerCase().includes(query) ||
+        model.base_model?.toLowerCase().includes(query)
+      );
+    }
+    
     // Filter by tier
     if (selectedTier !== "all") {
       filtered = filtered.filter(model => model.plan === selectedTier);
