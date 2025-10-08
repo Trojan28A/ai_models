@@ -199,31 +199,46 @@ class AIModelsHubTester:
             self.log_test("Chat Endpoint (Real A4F API)", False, f"Exception: {str(e)}")
             return False
 
-    def test_image_generation_endpoint(self):
-        """Test the mocked image generation endpoint"""
+    def test_image_generation_endpoint_real_api(self):
+        """Test the image generation endpoint with real A4F API"""
+        # API key should already be saved from previous test
         try:
+            # Test with midjourney-v7 model as specified in the request
             response = requests.post(f"{self.api_url}/generate-image", 
                                    json={
-                                       "model_id": "test-image-model",
-                                       "prompt": "A beautiful sunset"
+                                       "model_id": "midjourney-v7",
+                                       "prompt": "A sunset over mountains"
                                    }, 
-                                   timeout=10)
+                                   timeout=60)  # Longer timeout for image generation
             success = response.status_code == 200
             
             if success:
                 data = response.json()
                 has_image_url = 'image_url' in data
-                has_model = 'model' in data
-                details = f"Has image_url: {has_image_url}, Has model: {has_model}"
-                self.log_test("Image Generation Endpoint (Mocked)", has_image_url and has_model, details)
-                return has_image_url and has_model
+                has_error = 'error' in data
+                
+                if has_error:
+                    self.log_test("Image Generation Endpoint (Real A4F API)", False, 
+                                f"API Error: {data['error']}")
+                    return False
+                elif has_image_url:
+                    # Check if image URL looks real (not mock)
+                    image_url = data['image_url']
+                    is_mock = "mock" in image_url.lower() or "placeholder" in image_url.lower() or "example.com" in image_url.lower()
+                    is_valid_url = image_url.startswith(('http://', 'https://'))
+                    details = f"Image URL: {image_url[:50]}..., Is mock: {is_mock}, Valid URL: {is_valid_url}"
+                    self.log_test("Image Generation Endpoint (Real A4F API)", not is_mock and is_valid_url, details)
+                    return not is_mock and is_valid_url
+                else:
+                    self.log_test("Image Generation Endpoint (Real A4F API)", False, "No image_url field in data")
+                    return False
             else:
-                self.log_test("Image Generation Endpoint (Mocked)", False, 
+                self.log_test("Image Generation Endpoint (Real A4F API)", False, 
                             f"Status: {response.status_code}", 200, response.status_code)
                 return False
                 
         except Exception as e:
-            self.log_test("Image Generation Endpoint (Mocked)", False, f"Exception: {str(e)}")
+            self.log_test("Image Generation Endpoint (Real A4F API)", False, f"Exception: {str(e)}")
             return False
 
     def test_status_endpoints(self):
