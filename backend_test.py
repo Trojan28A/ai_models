@@ -444,7 +444,8 @@ class AIModelsHubTester:
         auth_ok = self.test_api_key_authentication()
         chat_real_ok = self.test_chat_endpoint_real_api()
         image_real_ok = self.test_image_generation_endpoint_real_api()
-        tiers_ok = self.test_different_model_tiers()
+        free_models_ok = self.test_different_free_tier_models()
+        plan_restrictions_ok = self.test_plan_restrictions()
         error_handling_ok = self.test_invalid_model_error_handling()
 
         print("=" * 60)
