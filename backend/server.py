@@ -344,7 +344,8 @@ async def chat_with_model(request: ModelRequest):
                         return {"error": "No response from model"}
                 else:
                     error_text = await response.text()
-                    return {"error": f"API call failed: {error_text}"}
+                    user_friendly_error = parse_a4f_error(error_text)
+                    return {"error": user_friendly_error, "status_code": response.status}
     
     except Exception as e:
         logger.error(f"Error in chat: {str(e)}")
