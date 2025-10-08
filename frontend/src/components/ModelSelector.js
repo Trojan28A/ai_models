@@ -114,7 +114,37 @@ const ModelSelector = ({ selectedModel, onModelChange, modelType = "all", classN
     );
   }
 
+  // Filter models based on search query
+  const filteredModels = models.filter(model => {
+    if (!searchQuery) return true;
+    const searchLower = searchQuery.toLowerCase();
+    return model.name?.toLowerCase().includes(searchLower);
+  });
+
   const selectedModelData = models.find(m => m.name === selectedModel?.name || m.name === selectedModel);
+  
+  // Get available providers for selected model
+  const availableProviders = selectedModelData?.proxy_providers || [];
+  const currentProvider = selectedProvider || (availableProviders.length > 0 ? availableProviders[0] : null);
+
+  // Handle model change with provider
+  const handleModelChange = (modelName) => {
+    const model = models.find(m => m.name === modelName);
+    if (model) {
+      // Select first provider by default
+      const firstProvider = model.proxy_providers?.[0];
+      setSelectedProvider(firstProvider);
+      onModelChange({ ...model, selectedProvider: firstProvider });
+    }
+  };
+
+  // Handle provider change
+  const handleProviderChange = (provider) => {
+    setSelectedProvider(provider);
+    if (selectedModelData) {
+      onModelChange({ ...selectedModelData, selectedProvider: provider });
+    }
+  };
 
   return (
     <Card className={`w-full ${className}`}>
@@ -130,40 +160,98 @@ const ModelSelector = ({ selectedModel, onModelChange, modelType = "all", classN
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Search Input */}
         <div>
           <label className="text-sm font-medium text-slate-700 mb-2 block">
-            Choose Model ({models.length} available)
+            Search Models
+          </label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              type="text"
+              placeholder="Type to search models..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-slate-700 mb-2 block">
+            Choose Model ({filteredModels.length} {searchQuery ? 'found' : 'available'})
           </label>
           <Select 
             value={selectedModel?.name || selectedModel || ""} 
-            onValueChange={(value) => {
-              const model = models.find(m => m.name === value);
-              onModelChange(model);
-            }}
+            onValueChange={handleModelChange}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select a model..." />
             </SelectTrigger>
             <SelectContent className="max-h-60 overflow-y-auto">
-              {models.map((model) => (
-                <SelectItem key={model.name} value={model.name} className="flex items-center justify-between py-3">
-                  <div className="flex items-center space-x-2 w-full">
-                    <span className="text-lg">{getModelTypeIcon(model.type)}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{model.name}</div>
-                      <div className="text-xs text-slate-500 truncate">
-                        {model.description || model.type}
+              {filteredModels.length === 0 ? (
+                <div className="p-4 text-center text-sm text-slate-500">
+                  No models found matching "{searchQuery}"
+                </div>
+              ) : (
+                filteredModels.map((model) => {
+                  const firstProvider = model.proxy_providers?.[0];
+                  const providerName = firstProvider?.id?.split('/')?.[0] || '';
+                  
+                  return (
+                    <SelectItem key={model.name} value={model.name} className="flex items-center justify-between py-3">
+                      <div className="flex items-center space-x-2 w-full">
+                        <span className="text-lg">{getModelTypeIcon(model.type)}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium truncate">{model.name}</div>
+                          <div className="text-xs text-slate-500 truncate flex items-center gap-1">
+                            {providerName && (
+                              <span className="font-medium text-blue-600">{providerName}</span>
+                            )}
+                            {providerName && (model.description || model.type) && <span>•</span>}
+                            <span>{model.description || model.type}</span>
+                          </div>
+                        </div>
+                        <Badge className={`text-xs ${getTierColor(model.plan)} ml-2`}>
+                          {model.plan?.toUpperCase() || 'UNKNOWN'}
+                        </Badge>
                       </div>
-                    </div>
-                    <Badge className={`text-xs ${getTierColor(model.plan)} ml-2`}>
-                      {model.plan?.toUpperCase() || 'UNKNOWN'}
-                    </Badge>
-                  </div>
-                </SelectItem>
-              ))}
+                    </SelectItem>
+                  );
+                })
+              )}
             </SelectContent>
           </Select>
         </div>
+
+        {/* Provider Selector - Show only if multiple providers available */}
+        {selectedModelData && availableProviders.length > 1 && (
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">
+              Provider ({availableProviders.length} available)
+            </label>
+            <Select 
+              value={currentProvider?.id || ""} 
+              onValueChange={(value) => {
+                const provider = availableProviders.find(p => p.id === value);
+                handleProviderChange(provider);
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select provider..." />
+              </SelectTrigger>
+              <SelectContent>
+                {availableProviders.map((provider) => (
+                  <SelectItem key={provider.id} value={provider.id}>
+                    <div className="flex items-center justify-between w-full">
+                      <span className="font-medium">{provider.id}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Selected Model Info */}
         {selectedModelData && (
