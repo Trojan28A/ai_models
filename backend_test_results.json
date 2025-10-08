@@ -1,0 +1,92 @@
+{
+  "total_tests": 12,
+  "passed_tests": 10,
+  "success_rate": 83.33333333333334,
+  "critical_success": true,
+  "detailed_results": [
+    {
+      "test_name": "Root API Endpoint",
+      "success": true,
+      "details": "{'message': 'AI Models Hub API'}",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "test_name": "Models Endpoint (412 models)",
+      "success": true,
+      "details": "Total models: 412, Categories: ['text', 'image', 'audio', 'video', 'other']",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Models Endpoint - FREE plan",
+      "success": true,
+      "details": "Plan free: 104 models",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Models Endpoint - BASIC plan",
+      "success": true,
+      "details": "Plan basic: 141 models",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Models Endpoint - PRO plan",
+      "success": true,
+      "details": "Plan pro: 167 models",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Save API Key",
+      "success": true,
+      "details": "Status: 200",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "test_name": "Get API Key",
+      "success": true,
+      "details": "Retrieved key matches: True",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Delete API Key",
+      "success": true,
+      "details": "Status: 200",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "test_name": "Chat Endpoint (Mocked)",
+      "success": false,
+      "details": "Has response: False, Has usage: False",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Image Generation Endpoint (Mocked)",
+      "success": false,
+      "details": "Has image_url: False, Has model: False",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Create Status Check",
+      "success": true,
+      "details": "Status: 200",
+      "expected_status": 200,
+      "actual_status": 200
+    },
+    {
+      "test_name": "Get Status Checks",
+      "success": true,
+      "details": "Status: 200",
+      "expected_status": 200,
+      "actual_status": 200
+    }
+  ]
+}
