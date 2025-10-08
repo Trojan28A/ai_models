@@ -531,9 +531,22 @@ async def chat_with_model(request: TextModelRequest):
             }
         }
 
+def aspect_ratio_to_size(aspect_ratio: str, base_size: str = "1024x1024") -> str:
+    """Convert aspect ratio to appropriate size"""
+    aspect_ratios = {
+        "1:1": "1024x1024",
+        "16:9": "1792x1024", 
+        "9:16": "1024x1792",
+        "4:3": "1536x1152",
+        "3:4": "1152x1536",
+        "3:2": "1536x1024",
+        "2:3": "1024x1536"
+    }
+    return aspect_ratios.get(aspect_ratio, base_size)
+
 @api_router.post("/generate-image")
-async def generate_image(request: ModelRequest):
-    """Generate image with a model"""
+async def generate_image(request: ImageModelRequest):
+    """Generate image with enhanced options"""
     try:
         # Get API key from request or stored keys
         api_key = request.api_key
@@ -543,10 +556,32 @@ async def generate_image(request: ModelRequest):
                 api_key = stored_key["api_key"]
         
         if not api_key:
-            return {"error": "No API key provided. Please add your A4F API key in settings."}
+            return {
+                "error": {
+                    "type": "no_api_key",
+                    "message": "🔐 No API key configured.",
+                    "suggestion": "Please add your A4F API key in Settings to use the models.",
+                    "action": "add_api_key"
+                }
+            }
         
         # Get the full model ID with provider prefix
         full_model_id = await get_full_model_id(request.model_id)
+        
+        # Convert aspect ratio to size if needed
+        if request.aspect_ratio and request.aspect_ratio != "custom":
+            size = aspect_ratio_to_size(request.aspect_ratio, request.size)
+        else:
+            size = request.size
+        
+        # Build enhanced prompt with negative prompt if provided
+        enhanced_prompt = request.prompt
+        if request.negative_prompt:
+            enhanced_prompt = f"{request.prompt} --negative {request.negative_prompt}"
+        
+        # Add style information if provided
+        if request.style:
+            enhanced_prompt = f"{enhanced_prompt} --style {request.style}"
         
         # Make real API call to A4F for image generation
         headers = {
@@ -556,40 +591,79 @@ async def generate_image(request: ModelRequest):
         
         payload = {
             "model": full_model_id,
-            "prompt": request.prompt,
+            "prompt": enhanced_prompt,
             "n": 1,
-            "size": "512x512"
+            "size": size,
+            "quality": request.quality,
+            "response_format": "url"
         }
+        
+        # Add model-specific parameters if applicable
+        if "stable-diffusion" in full_model_id.lower() or "sd" in full_model_id.lower():
+            # Add Stable Diffusion specific parameters
+            payload.update({
+                "cfg_scale": request.cfg_scale,
+                "steps": request.steps,
+                "seed": request.seed
+            })
         
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 "https://api.a4f.co/v1/images/generations", 
                 headers=headers, 
-                json=payload
+                json=payload,
+                timeout=aiohttp.ClientTimeout(total=120)  # Longer timeout for image generation
             ) as response:
                 if response.status == 200:
                     data = await response.json()
                     if "data" in data and len(data["data"]) > 0:
+                        width, height = size.split("x")
                         return {
+                            "success": True,
                             "image_url": data["data"][0]["url"],
                             "model": request.model_id,
                             "prompt": request.prompt,
-                            "width": 512,
-                            "height": 512
+                            "width": int(width),
+                            "height": int(height),
+                            "size": size,
+                            "aspect_ratio": request.aspect_ratio,
+                            "quality": request.quality,
+                            "style": request.style
                         }
                     else:
-                        return {"error": "No image generated"}
+                        return {
+                            "error": {
+                                "type": "no_image_generated",
+                                "message": "🖼️ No image was generated.",
+                                "suggestion": "Please try again with a different prompt or model.",
+                                "action": "retry"
+                            }
+                        }
                 else:
                     error_text = await response.text()
-                    user_friendly_error = parse_a4f_error(error_text)
-                    return {"error": user_friendly_error, "status_code": response.status}
+                    error_info = parse_a4f_error(error_text)
+                    return {"error": error_info, "status_code": response.status}
     
     except aiohttp.ClientError as e:
         logger.error(f"Network error in image generation: {str(e)}")
-        return {"error": "🌐 Network error. Please check your internet connection and try again."}
+        return {
+            "error": {
+                "type": "network_error",
+                "message": "🌐 Network connection failed during image generation.",
+                "suggestion": "Please check your internet connection and try again.",
+                "action": "check_connection"
+            }
+        }
     except Exception as e:
         logger.error(f"Error in image generation: {str(e)}")
-        return {"error": f"⚠️ Unexpected error: {str(e)}"}
+        return {
+            "error": {
+                "type": "unexpected_error",
+                "message": f"⚠️ Unexpected error occurred: {str(e)[:100]}",
+                "suggestion": "Please try again or contact support if the issue persists.",
+                "action": "retry"
+            }
+        }
 
 # Include the router in the main app
 app.include_router(api_router)
