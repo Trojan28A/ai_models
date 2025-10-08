@@ -665,6 +665,90 @@ async def generate_image(request: ImageModelRequest):
             }
         }
 
+@api_router.post("/generate-audio")
+async def generate_audio(request: AudioModelRequest):
+    """Generate audio with a model (placeholder for future implementation)"""
+    try:
+        # Get API key from request or stored keys
+        api_key = request.api_key
+        if not api_key:
+            stored_key = await db.api_keys.find_one({"provider": "a4f"}, {"_id": 0})
+            if stored_key:
+                api_key = stored_key["api_key"]
+        
+        if not api_key:
+            return {
+                "error": {
+                    "type": "no_api_key",
+                    "message": "🔐 No API key configured.",
+                    "suggestion": "Please add your A4F API key in Settings to use the models.",
+                    "action": "add_api_key"
+                }
+            }
+        
+        # Check if audio generation is supported (placeholder)
+        return {
+            "error": {
+                "type": "feature_not_implemented",
+                "message": "🎵 Audio generation is not yet supported.",
+                "suggestion": "This feature is coming soon. Please check back later.",
+                "action": "wait_for_feature"
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in audio generation: {str(e)}")
+        return {
+            "error": {
+                "type": "unexpected_error",
+                "message": f"⚠️ Unexpected error occurred: {str(e)[:100]}",
+                "suggestion": "Please try again or contact support if the issue persists.",
+                "action": "retry"
+            }
+        }
+
+@api_router.post("/generate-video")
+async def generate_video(request: VideoModelRequest):
+    """Generate video with a model (placeholder for future implementation)"""
+    try:
+        # Get API key from request or stored keys
+        api_key = request.api_key
+        if not api_key:
+            stored_key = await db.api_keys.find_one({"provider": "a4f"}, {"_id": 0})
+            if stored_key:
+                api_key = stored_key["api_key"]
+        
+        if not api_key:
+            return {
+                "error": {
+                    "type": "no_api_key",
+                    "message": "🔐 No API key configured.",
+                    "suggestion": "Please add your A4F API key in Settings to use the models.",
+                    "action": "add_api_key"
+                }
+            }
+        
+        # Check if video generation is supported (placeholder)
+        return {
+            "error": {
+                "type": "feature_not_implemented", 
+                "message": "🎥 Video generation is not yet supported.",
+                "suggestion": "This feature is coming soon. Please check back later.",
+                "action": "wait_for_feature"
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in video generation: {str(e)}")
+        return {
+            "error": {
+                "type": "unexpected_error",
+                "message": f"⚠️ Unexpected error occurred: {str(e)[:100]}",
+                "suggestion": "Please try again or contact support if the issue persists.",
+                "action": "retry"
+            }
+        }
+
 # Include the router in the main app
 app.include_router(api_router)
 
