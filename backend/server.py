@@ -455,7 +455,7 @@ async def chat_with_model(request: TextModelRequest):
             }
         
         # Get the full model ID with provider prefix
-        full_model_id = await get_full_model_id(request.model_id)
+        full_model_id = await get_full_model_id(request.model_id, request.provider_id)
         
         # Build messages array with conversation history and system prompt
         messages = []
