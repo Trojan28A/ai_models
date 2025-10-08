@@ -92,7 +92,7 @@
     {
       "test_name": "Image Generation Endpoint (Real A4F API)",
       "success": true,
-      "details": "Image URL: https://api.a4f.co/v1/images/serve/5ebfd908ed87485..., Is mock: False, Valid URL: True",
+      "details": "Image URL: https://api.a4f.co/v1/images/serve/f5732108973b46d..., Is mock: False, Valid URL: True",
       "expected_status": null,
       "actual_status": null
     },
@@ -106,21 +106,21 @@
     {
       "test_name": "Chat with llama-3.1-70b",
       "success": true,
-      "details": "Model: llama-3.1-70b, Real response: True, Length: 29",
+      "details": "Model: llama-3.1-70b, Real response: True, Length: 6",
       "expected_status": null,
       "actual_status": null
     },
     {
       "test_name": "Chat with qwen-2.5-72b",
       "success": true,
-      "details": "Model: qwen-2.5-72b, Real response: True, Length: 30",
+      "details": "Model: qwen-2.5-72b, Real response: True, Length: 29",
       "expected_status": null,
       "actual_status": null
     },
     {
       "test_name": "Plan Restriction Enforcement",
       "success": false,
-      "details": "Plan restriction properly enforced: False",
+      "details": "Plan restriction properly enforced: False, Error: API call failed: {\"error\":{\"message\":\"You have exceeded your requests per minute limit of 5. Please ...",
       "expected_status": null,
       "actual_status": null
     },
