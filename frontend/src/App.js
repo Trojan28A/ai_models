@@ -122,37 +122,94 @@ const Home = () => {
           </div>
         )}
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-4 items-center justify-center">
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-slate-700">Tier:</label>
-            <select 
-              value={selectedTier} 
-              onChange={(e) => setSelectedTier(e.target.value)}
-              className="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Tiers</option>
-              <option value="free">Free</option>
-              <option value="basic">Basic</option>
-              <option value="pro">Pro</option>
-            </select>
+        {/* Search and Filters */}
+        <div className="flex flex-col gap-6 items-center">
+          {/* Search Bar */}
+          <div className="w-full max-w-md">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search models by name, description, or provider..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-3 pl-10 border border-slate-300 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                data-testid="search-input"
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Filter Buttons */}
+          <div className="flex flex-wrap gap-6 items-center justify-center">
+            {/* Tier Filter */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-slate-700 text-center">Tier:</label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "all", label: "All Tiers", color: "bg-slate-100 text-slate-700 hover:bg-slate-200" },
+                  { value: "free", label: "Free", color: "bg-emerald-100 text-emerald-800 hover:bg-emerald-200" },
+                  { value: "basic", label: "Basic", color: "bg-blue-100 text-blue-800 hover:bg-blue-200" },
+                  { value: "pro", label: "Pro", color: "bg-purple-100 text-purple-800 hover:bg-purple-200" }
+                ].map((tier) => (
+                  <button
+                    key={tier.value}
+                    onClick={() => setSelectedTier(tier.value)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      selectedTier === tier.value 
+                        ? `${tier.color} ring-2 ring-offset-2 ring-blue-500 shadow-md` 
+                        : `${tier.color} hover:shadow-sm`
+                    }`}
+                    data-testid={`tier-filter-${tier.value}`}
+                  >
+                    {tier.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Category Filter */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-slate-700 text-center">Category:</label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "all", label: "All", icon: "⚡" },
+                  { value: "text", label: "Text", icon: "💬" },
+                  { value: "image", label: "Image", icon: "🖼️" },
+                  { value: "audio", label: "Audio", icon: "🎵" },
+                  { value: "video", label: "Video", icon: "🎥" },
+                  { value: "other", label: "Other", icon: "⚙️" }
+                ].map((category) => (
+                  <button
+                    key={category.value}
+                    onClick={() => setSelectedCategory(category.value)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                      selectedCategory === category.value 
+                        ? "bg-blue-100 text-blue-800 ring-2 ring-offset-2 ring-blue-500 shadow-md" 
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200 hover:shadow-sm"
+                    }`}
+                    data-testid={`category-filter-${category.value}`}
+                  >
+                    <span>{category.icon}</span>
+                    {category.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-slate-700">Category:</label>
-            <select 
-              value={selectedCategory} 
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Categories</option>
-              <option value="text">Text</option>
-              <option value="image">Image</option>
-              <option value="audio">Audio</option>
-              <option value="video">Video</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
+          {/* Results Summary */}
+          {(searchQuery || selectedTier !== "all" || selectedCategory !== "all") && (
+            <div className="text-sm text-slate-600 bg-slate-50 px-4 py-2 rounded-lg">
+              {searchQuery && <span>Search: "{searchQuery}" </span>}
+              {selectedTier !== "all" && <span>• Tier: {selectedTier} </span>}
+              {selectedCategory !== "all" && <span>• Category: {selectedCategory} </span>}
+              <span>• Found: {filteredModels.length} models</span>
+            </div>
+          )}
         </div>
 
         {/* Models List */}
