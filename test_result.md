@@ -119,6 +119,9 @@
         - working: true
         - agent: "main"
         - comment: "FIXED: Added model ID resolution function and proper Bearer token authentication. Chat endpoint now returns real API responses from A4F instead of mock data."
+        - working: true
+        - agent: "testing"
+        - comment: "VERIFIED: Chat endpoint tested with deepseek-v3 model and prompt 'Hello, how are you?' - returned real AI response (121 chars). No mock data detected. Bearer token authentication working correctly with API key ddc-a4f-e3ce624cd8c148bea8d2d373ba29aa3d."
 
   - task: "Fix A4F API authentication for image generation endpoint"
     implemented: true
