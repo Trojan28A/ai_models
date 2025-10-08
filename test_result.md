@@ -102,7 +102,15 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-## user_problem_statement: User reports that the website works fine but is using mock data responses instead of real API responses even when they enter an API key. They want to fix the mock data issue to use the real A4F API with proper authentication.
+## user_problem_statement: User wants comprehensive enhancements to the multi-model AI playground:
+1. Add model selector with search functionality to all playgrounds (filter by name)
+2. Add provider switching capability for models with multiple providers
+3. Display provider information clearly
+4. Add model-specific options to all playgrounds:
+   - Image: aspect ratio, quality, negative prompt, style, CFG scale, steps, seed
+   - Audio: voice, speed, language, format
+   - Video: duration, resolution, FPS, aspect ratio, style
+5. Connect all options to backend API (no mock responses)
 
 ## backend:
   - task: "Fix A4F API authentication for chat endpoint"
