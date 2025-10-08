@@ -177,3 +177,5 @@
 ## agent_communication:
     - agent: "main"
     - message: "Identified the root cause: Backend is trying to use Bearer token authentication but with wrong API endpoints. Need to update to use https://api.a4f.co/v1/ endpoints with proper Bearer token authentication."
+    - agent: "main"
+    - message: "RESOLVED: The issue was that A4F API requires model IDs with provider prefixes (e.g., 'provider-3/deepseek-v3' instead of just 'deepseek-v3'). Added get_full_model_id() function to automatically resolve correct model format. Both chat and image generation now work with real API responses."
