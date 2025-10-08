@@ -193,7 +193,7 @@ async def get_models(plan: str):
                     data = await response.json()
                     return data
                 else:
-                    raise HTTPException(status_code=response.status, detail=f"Failed to fetch models from A4F API")
+                    raise HTTPException(status_code=response.status, detail="Failed to fetch models from A4F API")
     
     except Exception as e:
         logger.error(f"Error fetching models: {str(e)}")
