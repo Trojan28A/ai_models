@@ -101,3 +101,73 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+## user_problem_statement: User reports that the website works fine but is using mock data responses instead of real API responses even when they enter an API key. They want to fix the mock data issue to use the real A4F API with proper authentication.
+
+## backend:
+  - task: "Fix A4F API authentication for chat endpoint"
+    implemented: false
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+        - agent: "main"
+        - comment: "Current chat endpoint uses wrong authentication method and API endpoint. Need to use Bearer token with https://api.a4f.co/v1/ endpoints instead of mock responses."
+
+  - task: "Fix A4F API authentication for image generation endpoint"
+    implemented: false
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+        - agent: "main"
+        - comment: "Current image generation endpoint uses wrong authentication method and API endpoint. Need to use Bearer token with https://api.a4f.co/v1/ endpoints instead of mock responses."
+
+  - task: "Model fetching from A4F API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "Model fetching works correctly and returns real data from A4F public API"
+
+## frontend:
+  - task: "API key management interface"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/Settings.js"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "Settings page allows users to save/manage API keys correctly"
+
+## metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+## test_plan:
+  current_focus:
+    - "Fix A4F API authentication for chat endpoint"
+    - "Fix A4F API authentication for image generation endpoint"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+## agent_communication:
+    - agent: "main"
+    - message: "Identified the root cause: Backend is trying to use Bearer token authentication but with wrong API endpoints. Need to update to use https://api.a4f.co/v1/ endpoints with proper Bearer token authentication."
