@@ -188,14 +188,14 @@ const TextPlayground = () => {
                 <Zap className="w-6 h-6 text-blue-600" />
                 <span>Text Playground</span>
               </h1>
-              {model && (
+              {selectedModel && (
                 <div className="flex items-center space-x-2 mt-1">
                   <span className="text-slate-600">Model:</span>
-                  <Badge className="bg-blue-100 text-blue-800 border-blue-200">{model.name}</Badge>
-                  <Badge className={`${model.plan === 'free' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 
-                    model.plan === 'basic' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                  <Badge className="bg-blue-100 text-blue-800 border-blue-200">{selectedModel.name}</Badge>
+                  <Badge className={`${selectedModel.plan === 'free' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 
+                    selectedModel.plan === 'basic' ? 'bg-blue-100 text-blue-800 border-blue-200' :
                     'bg-purple-100 text-purple-800 border-purple-200'}`}>
-                    {model.plan?.toUpperCase()}
+                    {selectedModel.plan?.toUpperCase()}
                   </Badge>
                 </div>
               )}
