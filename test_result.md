@@ -187,3 +187,54 @@
     - message: "RESOLVED: The issue was that A4F API requires model IDs with provider prefixes (e.g., 'provider-3/deepseek-v3' instead of just 'deepseek-v3'). Added get_full_model_id() function to automatically resolve correct model format. Both chat and image generation now work with real API responses."
     - agent: "testing"
     - message: "COMPREHENSIVE TESTING COMPLETED: All A4F API integration tests passed (18/18). Verified real API responses for chat (deepseek-v3 with 'Hello, how are you?') and image generation (midjourney-v7 with 'A sunset over mountains'). No mock data detected. Bearer token authentication working correctly. API key management functional. Plan restrictions properly enforced. Rate limiting working as expected from real A4F API."
+    - agent: "main"
+    - message: "BACKEND ENHANCED: Added comprehensive error handling with structured error responses, enhanced TextModelRequest and ImageModelRequest classes with advanced parameters (system prompts, conversation history, aspect ratios, quality settings), improved parse_a4f_error function to provide actionable user feedback with error types and suggested actions. Updated chat endpoint to support conversation context, system prompts, and enhanced text generation parameters."
+
+## backend:
+  - task: "Enhanced error handling and user feedback"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "IMPLEMENTED: Added structured error parsing with specific error types (rate_limit, model_unavailable, auth_error, insufficient_credits, etc.) and actionable suggestions. Enhanced error responses include type, message, suggestion, and action fields for better user experience."
+
+  - task: "Advanced text generation parameters"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "IMPLEMENTED: Added TextModelRequest with system_prompt, conversation_history, top_p, frequency_penalty, presence_penalty, and stream support. Chat endpoint now supports conversation context and enhanced parameters for better AI interactions."
+
+  - task: "Enhanced image generation options"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "IMPLEMENTED: Added ImageModelRequest with aspect_ratio, quality, size, style, cfg_scale, steps, seed, and negative_prompt support. Added aspect_ratio_to_size conversion function and model-specific parameter handling for Stable Diffusion."
+
+  - task: "Audio and Video generation endpoints"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+        - working: false
+        - agent: "main"
+        - comment: "PLACEHOLDER: Added AudioModelRequest and VideoModelRequest classes with placeholder endpoints. Currently returns 'feature_not_implemented' error with proper structure. Ready for future implementation when A4F supports audio/video generation."
