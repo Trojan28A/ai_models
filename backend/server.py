@@ -401,7 +401,8 @@ async def generate_image(request: ModelRequest):
                         return {"error": "No image generated"}
                 else:
                     error_text = await response.text()
-                    return {"error": f"Image generation failed: {error_text}"}
+                    user_friendly_error = parse_a4f_error(error_text)
+                    return {"error": user_friendly_error, "status_code": response.status}
     
     except Exception as e:
         logger.error(f"Error in image generation: {str(e)}")
