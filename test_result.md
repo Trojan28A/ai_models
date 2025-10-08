@@ -106,28 +106,34 @@
 
 ## backend:
   - task: "Fix A4F API authentication for chat endpoint"
-    implemented: false
-    working: false
+    implemented: true
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: false
         - agent: "main"
         - comment: "Current chat endpoint uses wrong authentication method and API endpoint. Need to use Bearer token with https://api.a4f.co/v1/ endpoints instead of mock responses."
+        - working: true
+        - agent: "main"
+        - comment: "FIXED: Added model ID resolution function and proper Bearer token authentication. Chat endpoint now returns real API responses from A4F instead of mock data."
 
   - task: "Fix A4F API authentication for image generation endpoint"
-    implemented: false
-    working: false
+    implemented: true
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: false
         - agent: "main"
         - comment: "Current image generation endpoint uses wrong authentication method and API endpoint. Need to use Bearer token with https://api.a4f.co/v1/ endpoints instead of mock responses."
+        - working: true
+        - agent: "main"
+        - comment: "FIXED: Added model ID resolution function and proper Bearer token authentication. Image generation endpoint now returns real images from A4F instead of mock responses."
 
   - task: "Model fetching from A4F API"
     implemented: true
