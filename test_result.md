@@ -137,6 +137,9 @@
         - working: true
         - agent: "main"
         - comment: "FIXED: Added model ID resolution function and proper Bearer token authentication. Image generation endpoint now returns real images from A4F instead of mock responses."
+        - working: true
+        - agent: "testing"
+        - comment: "VERIFIED: Image generation endpoint tested with midjourney-v7 model and prompt 'A sunset over mountains' - returns real image URLs from api.a4f.co. No mock data detected. Rate limiting properly enforced by real A4F API."
 
   - task: "Model fetching from A4F API"
     implemented: true
