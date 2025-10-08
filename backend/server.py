@@ -865,7 +865,17 @@ async def generate_video(request: VideoModelRequest):
                     error_text = await response.text()
                     error_info = parse_a4f_error(error_text)
                     return {"error": error_info, "status_code": response.status}
-        
+    
+    except aiohttp.ClientError as e:
+        logger.error(f"Network error in video generation: {str(e)}")
+        return {
+            "error": {
+                "type": "network_error",
+                "message": "🌐 Network connection failed during video generation.",
+                "suggestion": "Please check your internet connection and try again.",
+                "action": "check_connection"
+            }
+        }
     except Exception as e:
         logger.error(f"Error in video generation: {str(e)}")
         return {
