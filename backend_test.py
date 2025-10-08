@@ -462,7 +462,8 @@ class AIModelsHubTester:
         print(f"   Chat API: {'✅' if chat_real_ok else '❌'}")
         print(f"   Image API: {'✅' if image_real_ok else '❌'}")
         print(f"   Authentication: {'✅' if auth_ok else '❌'}")
-        print(f"   Model Tiers: {'✅' if tiers_ok else '❌'}")
+        print(f"   Free Tier Models: {'✅' if free_models_ok else '❌'}")
+        print(f"   Plan Restrictions: {'✅' if plan_restrictions_ok else '❌'}")
         print(f"   Error Handling: {'✅' if error_handling_ok else '❌'}")
         
         if critical_success and a4f_success:
