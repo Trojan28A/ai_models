@@ -61,7 +61,7 @@ const TextPlayground = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!prompt.trim()) return;
+    if (!prompt.trim() || !selectedModel) return;
 
     const userMessage = {
       id: Date.now(),
@@ -72,44 +72,56 @@ const TextPlayground = () => {
 
     setMessages(prev => [...prev, userMessage]);
     setLoading(true);
+    setError(null);
 
     try {
+      // Build conversation history for conversation mode
+      const conversationHistory = conversationMode === "conversation" 
+        ? messages.filter(msg => !msg.isError).map(msg => ({
+            role: msg.role,
+            content: msg.content
+          }))
+        : [];
+
       const response = await axios.post(`${API}/chat`, {
-        model_id: model?.name || "default",
+        model_id: selectedModel?.name || "default",
         prompt: prompt,
+        system_prompt: systemPrompt || undefined,
         temperature: temperature[0],
         max_tokens: maxTokens[0],
+        top_p: topP[0],
+        frequency_penalty: frequencyPenalty[0],
+        presence_penalty: presencePenalty[0],
+        conversation_history: conversationHistory,
         api_key: apiKey || undefined,
       });
 
-      const assistantMessage = {
-        id: Date.now() + 1,
-        role: "assistant",
-        content: response.data.response || "No response received",
-        timestamp: new Date().toLocaleTimeString(),
-        usage: response.data.usage,
-      };
+      if (response.data.success) {
+        const assistantMessage = {
+          id: Date.now() + 1,
+          role: "assistant",
+          content: response.data.response,
+          timestamp: new Date().toLocaleTimeString(),
+          usage: response.data.usage,
+          finish_reason: response.data.finish_reason,
+        };
 
-      setMessages(prev => [...prev, assistantMessage]);
-      
-      if (response.data.error) {
-        toast.error(response.data.error);
-      } else {
+        setMessages(prev => [...prev, assistantMessage]);
         toast.success("Response generated successfully!");
+      } else if (response.data.error) {
+        setError(response.data.error);
+        toast.error(response.data.error.message);
       }
     } catch (error) {
       console.error("Error:", error);
-      toast.error("Failed to generate response");
-      
-      const errorMessage = {
-        id: Date.now() + 1,
-        role: "assistant",
-        content: "Sorry, I encountered an error while processing your request.",
-        timestamp: new Date().toLocaleTimeString(),
-        isError: true,
+      const errorInfo = {
+        type: "request_failed",
+        message: "❌ Failed to send request",
+        suggestion: "Please check your connection and try again.",
+        action: "retry"
       };
-      
-      setMessages(prev => [...prev, errorMessage]);
+      setError(errorInfo);
+      toast.error("Failed to generate response");
     } finally {
       setLoading(false);
       setPrompt("");
