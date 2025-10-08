@@ -407,9 +407,12 @@ async def generate_image(request: ModelRequest):
                     user_friendly_error = parse_a4f_error(error_text)
                     return {"error": user_friendly_error, "status_code": response.status}
     
+    except aiohttp.ClientError as e:
+        logger.error(f"Network error in image generation: {str(e)}")
+        return {"error": "🌐 Network error. Please check your internet connection and try again."}
     except Exception as e:
         logger.error(f"Error in image generation: {str(e)}")
-        return {"error": f"Error in image generation: {str(e)}"}
+        return {"error": f"⚠️ Unexpected error: {str(e)}"}
 
 # Include the router in the main app
 app.include_router(api_router)
