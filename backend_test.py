@@ -335,7 +335,7 @@ class AIModelsHubTester:
                 if has_error:
                     error_msg = data['error']
                     is_plan_restriction = 'not available for your current plan' in error_msg
-                    details = f"Plan restriction properly enforced: {is_plan_restriction}"
+                    details = f"Plan restriction properly enforced: {is_plan_restriction}, Error: {error_msg[:100]}..."
                     self.log_test("Plan Restriction Enforcement", is_plan_restriction, details)
                     return is_plan_restriction
                 else:
