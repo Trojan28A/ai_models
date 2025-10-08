@@ -403,7 +403,7 @@ const ImagePlayground = () => {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-testid="image-gallery">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4" data-testid="image-gallery">
                 {generatedImages.map((image) => (
                   <Card key={image.id} className="overflow-hidden">
                     <div className="aspect-square bg-slate-100">
