@@ -251,8 +251,8 @@ async def get_all_models():
         logger.error(f"Error fetching all models: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error fetching all models: {str(e)}")
 
-def parse_a4f_error(error_response: str) -> str:
-    """Parse A4F API error response and return user-friendly message"""
+def parse_a4f_error(error_response: str) -> Dict[str, Any]:
+    """Parse A4F API error response and return structured user-friendly message"""
     try:
         if isinstance(error_response, str):
             error_data = json.loads(error_response)
@@ -268,42 +268,125 @@ def parse_a4f_error(error_response: str) -> str:
             
             # Model not found or invalid
             if "provider_prefix_missing_or_model_not_found" in error_code:
-                return f"❌ Model '{error_info.get('param', 'unknown')}' not found or unavailable. Please select a different model."
+                return {
+                    "type": "model_not_found",
+                    "message": f"❌ Model '{error_info.get('param', 'unknown')}' not found or unavailable.",
+                    "suggestion": "Please select a different model from the dropdown.",
+                    "action": "switch_model"
+                }
                 
-            # Rate limiting
-            elif "rate_limit" in error_code.lower() or "quota" in error_message.lower():
-                return "⏱️ Rate limit exceeded. You've hit your daily usage quota for this model. Please try again later or use a different model."
+            # Rate limiting / Daily quota exceeded
+            elif "rate_limit" in error_code.lower() or "quota" in error_message.lower() or "requests per day" in error_message.lower():
+                return {
+                    "type": "rate_limit",
+                    "message": "⏱️ Daily usage limit reached for this model.",
+                    "suggestion": "Try again tomorrow, upgrade your A4F plan, or switch to a different model.",
+                    "action": "wait_or_upgrade"
+                }
                 
-            # Model unavailable/down
-            elif "unavailable" in error_message.lower() or "down" in error_message.lower():
-                return "🚫 This model is temporarily unavailable or under maintenance. Please try a different model."
+            # Model unavailable/maintenance
+            elif "unavailable" in error_message.lower() or "down" in error_message.lower() or "maintenance" in error_message.lower():
+                return {
+                    "type": "model_unavailable", 
+                    "message": "🚫 This model is temporarily unavailable or under maintenance.",
+                    "suggestion": "Please try a different model or check back later.",
+                    "action": "switch_model"
+                }
                 
             # Authentication errors
-            elif "unauthorized" in error_type.lower() or "auth" in error_code.lower():
-                return "🔐 Authentication failed. Please check your API key in Settings."
+            elif "unauthorized" in error_type.lower() or "auth" in error_code.lower() or "invalid_api_key" in error_code:
+                return {
+                    "type": "auth_error",
+                    "message": "🔐 Authentication failed. Your API key is invalid or expired.",
+                    "suggestion": "Please update your API key in Settings.",
+                    "action": "update_api_key"
+                }
                 
             # Insufficient credits/payment required
-            elif "credit" in error_message.lower() or "payment" in error_message.lower() or "billing" in error_message.lower():
-                return "💳 Insufficient credits or payment required. Please check your A4F account billing status."
+            elif "credit" in error_message.lower() or "payment" in error_message.lower() or "billing" in error_message.lower() or "insufficient_quota" in error_code:
+                return {
+                    "type": "insufficient_credits",
+                    "message": "💳 Insufficient credits or payment required.",
+                    "suggestion": "Please add credits to your A4F account or upgrade your plan.",
+                    "action": "add_credits"
+                }
                 
-            # Model access restricted
-            elif "access" in error_message.lower() or "permission" in error_message.lower():
-                return "🔒 Access denied to this model. You may need to upgrade your A4F plan to use this model."
+            # Model access restricted (plan limitation)
+            elif "access" in error_message.lower() or "permission" in error_message.lower() or "plan" in error_message.lower():
+                return {
+                    "type": "access_denied",
+                    "message": "🔒 Access denied to this model.",
+                    "suggestion": "You may need to upgrade your A4F plan to use this model.",
+                    "action": "upgrade_plan"
+                }
                 
-            # Server errors
-            elif "internal_server_error" in error_code or error_type == "api_error":
-                return "🔧 A4F service is experiencing issues. Please try again in a few minutes."
+            # Server errors / A4F issues
+            elif "internal_server_error" in error_code or error_type == "api_error" or "server_error" in error_code:
+                return {
+                    "type": "server_error",
+                    "message": "🔧 A4F service is experiencing issues.",
+                    "suggestion": "Please try again in a few minutes.",
+                    "action": "retry_later"
+                }
+                
+            # Invalid parameters
+            elif "invalid_request_error" in error_type or "parameter" in error_message.lower():
+                return {
+                    "type": "invalid_parameters",
+                    "message": "⚙️ Invalid parameters in your request.",
+                    "suggestion": "Please check your settings and try again.",
+                    "action": "check_parameters"
+                }
+                
+            # Context length exceeded
+            elif "context_length" in error_message.lower() or "token" in error_message.lower() and "limit" in error_message.lower():
+                return {
+                    "type": "context_limit",
+                    "message": "📝 Your prompt is too long for this model.",
+                    "suggestion": "Please shorten your prompt or use a model with larger context window.",
+                    "action": "shorten_prompt"
+                }
                 
             # Generic error with original message
             else:
-                return f"⚠️ Error: {error_message}"
+                return {
+                    "type": "unknown_error",
+                    "message": f"⚠️ Error: {error_message}",
+                    "suggestion": "Please try again or contact support if the issue persists.",
+                    "action": "retry"
+                }
+        
+        # Handle HTTP status errors
+        elif "error" in error_data:
+            error_msg = error_data.get("error", {})
+            if isinstance(error_msg, dict):
+                message = error_msg.get("message", str(error_data))
+            else:
+                message = str(error_msg)
+                
+            return {
+                "type": "http_error",
+                "message": f"❌ API Error: {message}",
+                "suggestion": "Please try again or check your request parameters.",
+                "action": "retry"
+            }
         
         # Fallback for unknown error format
-        return f"❌ API Error: {str(error_response)}"
+        return {
+            "type": "unknown_error",
+            "message": f"❌ Unexpected error: {str(error_response)[:200]}",
+            "suggestion": "Please try again or contact support if the issue persists.",
+            "action": "retry"
+        }
         
     except Exception as e:
         logger.warning(f"Error parsing A4F error response: {str(e)}")
-        return f"❌ Unexpected error: {str(error_response)}"
+        return {
+            "type": "parsing_error",
+            "message": f"❌ Error processing response: {str(error_response)[:100]}",
+            "suggestion": "Please try again or contact support.",
+            "action": "retry"
+        }
 
 async def get_full_model_id(model_name: str):
     """Get the full model ID with provider prefix from A4F API"""
