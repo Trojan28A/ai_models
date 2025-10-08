@@ -267,17 +267,17 @@ class AIModelsHubTester:
 
         return create_success and get_success
 
-    def test_different_model_tiers(self):
-        """Test chat with models from different tiers"""
-        # Test models from different tiers
+    def test_different_free_tier_models(self):
+        """Test chat with different models from free tier (API key is on free plan)"""
+        # Test multiple free tier models since API key is on free plan
         test_models = [
-            ("gpt-4o-mini", "free"),  # Free tier model
-            ("claude-3-haiku", "basic"),  # Basic tier model  
-            ("gpt-4o", "pro")  # Pro tier model
+            "gpt-4o-mini",
+            "llama-3.1-70b", 
+            "qwen-2.5-72b"
         ]
         
         all_success = True
-        for model_id, tier in test_models:
+        for model_id in test_models:
             try:
                 response = requests.post(f"{self.api_url}/chat", 
                                        json={
@@ -292,20 +292,66 @@ class AIModelsHubTester:
                 if success:
                     data = response.json()
                     has_response = 'response' in data and not 'error' in data
-                    details = f"Model: {model_id} ({tier} tier), Has response: {has_response}"
-                    self.log_test(f"Chat with {tier.upper()} tier model", has_response, details)
-                    if not has_response:
+                    if has_response:
+                        response_text = data['response']
+                        is_real = len(response_text) > 5 and not 'mock' in response_text.lower()
+                        details = f"Model: {model_id}, Real response: {is_real}, Length: {len(response_text)}"
+                        self.log_test(f"Chat with {model_id}", is_real, details)
+                        if not is_real:
+                            all_success = False
+                    else:
+                        error_msg = data.get('error', 'No error message')
+                        details = f"Model: {model_id}, Error: {error_msg}"
+                        self.log_test(f"Chat with {model_id}", False, details)
                         all_success = False
                 else:
-                    self.log_test(f"Chat with {tier.upper()} tier model", False, 
+                    self.log_test(f"Chat with {model_id}", False, 
                                 f"Status: {response.status_code}", 200, response.status_code)
                     all_success = False
                     
             except Exception as e:
-                self.log_test(f"Chat with {tier.upper()} tier model", False, f"Exception: {str(e)}")
+                self.log_test(f"Chat with {model_id}", False, f"Exception: {str(e)}")
                 all_success = False
         
         return all_success
+
+    def test_plan_restrictions(self):
+        """Test that plan restrictions are properly enforced"""
+        try:
+            # Try to use a basic/pro tier model with free plan API key
+            response = requests.post(f"{self.api_url}/chat", 
+                                   json={
+                                       "model_id": "gpt-4.1",  # Basic tier model
+                                       "prompt": "This should be restricted",
+                                       "temperature": 0.5,
+                                       "max_tokens": 50
+                                   }, 
+                                   timeout=30)
+            success = response.status_code == 200
+            
+            if success:
+                data = response.json()
+                has_error = 'error' in data
+                if has_error:
+                    error_msg = data['error']
+                    is_plan_restriction = 'not available for your current plan' in error_msg
+                    details = f"Plan restriction properly enforced: {is_plan_restriction}"
+                    self.log_test("Plan Restriction Enforcement", is_plan_restriction, details)
+                    return is_plan_restriction
+                else:
+                    # If no error, this might indicate a problem with plan enforcement
+                    self.log_test("Plan Restriction Enforcement", False, 
+                                "Expected plan restriction error but got response")
+                    return False
+            else:
+                # Non-200 status is also acceptable for plan restrictions
+                self.log_test("Plan Restriction Enforcement", True, 
+                            f"Properly returned error status: {response.status_code}")
+                return True
+                
+        except Exception as e:
+            self.log_test("Plan Restriction Enforcement", False, f"Exception: {str(e)}")
+            return False
 
     def test_invalid_model_error_handling(self):
         """Test error handling with invalid model names"""
