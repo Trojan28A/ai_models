@@ -182,8 +182,7 @@ async def get_models(plan: str):
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'
         }
 
-        # Check if user has stored API key or use default endpoint
-        stored_key = await db.api_keys.find_one({"provider": "a4f"}, {"_id": 0})
+        # Use A4F public endpoint for model listing
         
         url = f"https://www.a4f.co/api/get-display-models?plan={plan}"
         
