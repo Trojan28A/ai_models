@@ -1,7 +1,7 @@
 {
-  "total_tests": 17,
-  "passed_tests": 15,
-  "success_rate": 88.23529411764706,
+  "total_tests": 18,
+  "passed_tests": 17,
+  "success_rate": 94.44444444444444,
   "critical_success": true,
   "a4f_integration_success": true,
   "detailed_results": [
@@ -92,28 +92,35 @@
     {
       "test_name": "Image Generation Endpoint (Real A4F API)",
       "success": true,
-      "details": "Image URL: https://api.a4f.co/v1/images/serve/5fcb3a82f0f34c6..., Is mock: False, Valid URL: True",
+      "details": "Image URL: https://api.a4f.co/v1/images/serve/5ebfd908ed87485..., Is mock: False, Valid URL: True",
       "expected_status": null,
       "actual_status": null
     },
     {
-      "test_name": "Chat with FREE tier model",
+      "test_name": "Chat with gpt-4o-mini",
       "success": true,
-      "details": "Model: gpt-4o-mini (free tier), Has response: True",
+      "details": "Model: gpt-4o-mini, Real response: True, Length: 34",
       "expected_status": null,
       "actual_status": null
     },
     {
-      "test_name": "Chat with BASIC tier model",
-      "success": false,
-      "details": "Model: claude-3-haiku (basic tier), Has response: False",
+      "test_name": "Chat with llama-3.1-70b",
+      "success": true,
+      "details": "Model: llama-3.1-70b, Real response: True, Length: 29",
       "expected_status": null,
       "actual_status": null
     },
     {
-      "test_name": "Chat with PRO tier model",
+      "test_name": "Chat with qwen-2.5-72b",
+      "success": true,
+      "details": "Model: qwen-2.5-72b, Real response: True, Length: 30",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Plan Restriction Enforcement",
       "success": false,
-      "details": "Model: gpt-4o (pro tier), Has response: False",
+      "details": "Plan restriction properly enforced: False",
       "expected_status": null,
       "actual_status": null
     },
