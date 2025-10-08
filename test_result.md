@@ -166,6 +166,54 @@
         - agent: "main"
         - comment: "Settings page allows users to save/manage API keys correctly"
 
+  - task: "Model selector component"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/ModelSelector.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "IMPLEMENTED: Created reusable ModelSelector component with dropdown, model filtering by type, model information display, and refresh functionality. Integrates with all playgrounds for dynamic model selection."
+
+  - task: "Enhanced error display component"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/ErrorDisplay.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "IMPLEMENTED: Created comprehensive ErrorDisplay component that handles structured error responses from backend, provides actionable buttons (retry, switch model, go to settings), and shows contextual help based on error type."
+
+  - task: "Enhanced text playground with advanced options"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/TextPlayground.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "IMPLEMENTED: Added model selector integration, conversation modes (single/chat), system prompts, advanced parameters (temperature, top_p, frequency/presence penalties), conversation history support, enhanced error handling, and improved UI layout with better parameter controls."
+
+  - task: "Select UI component"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/ui/select.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "IMPLEMENTED: Created custom Select component with dropdown functionality, keyboard navigation support, and proper styling to support model selection dropdown."
+
 ## metadata:
   created_by: "main_agent"
   version: "1.0"
