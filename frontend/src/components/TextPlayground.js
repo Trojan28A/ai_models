@@ -6,9 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, Send, Loader2, Copy, Download, Trash2, Zap } from "lucide-react";
+import { ArrowLeft, Send, Loader2, Copy, Download, Trash2, Zap, Settings2, MessageSquare, Bot } from "lucide-react";
 import { toast } from "sonner";
 import Header from "./Header";
+import ModelSelector from "./ModelSelector";
+import ErrorDisplay from "./ErrorDisplay";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
