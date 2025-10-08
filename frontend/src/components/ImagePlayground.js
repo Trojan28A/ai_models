@@ -451,6 +451,7 @@ const ImagePlayground = () => {
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
       </div>
     </div>
