@@ -61,6 +61,7 @@ class ModelRequest(BaseModel):
 class TextModelRequest(BaseModel):
     model_id: str
     prompt: str
+    provider_id: Optional[str] = None  # Selected provider ID
     system_prompt: Optional[str] = None
     temperature: Optional[float] = 0.7
     max_tokens: Optional[int] = 1000
@@ -74,6 +75,7 @@ class TextModelRequest(BaseModel):
 class ImageModelRequest(BaseModel):
     model_id: str
     prompt: str
+    provider_id: Optional[str] = None  # Selected provider ID
     negative_prompt: Optional[str] = None
     aspect_ratio: Optional[str] = "1:1"  # 1:1, 16:9, 9:16, 4:3, 3:4
     quality: Optional[str] = "standard"  # standard, high
