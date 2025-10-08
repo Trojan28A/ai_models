@@ -215,61 +215,178 @@ const TextPlayground = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Settings Panel */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle className="text-lg">Settings</CardTitle>
-              <CardDescription>Adjust model parameters</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <label className="text-sm font-medium text-slate-700 mb-2 block">
-                  Temperature: {temperature[0]}
-                </label>
-                <Slider
-                  value={temperature}
-                  onValueChange={setTemperature}
-                  max={1}
-                  min={0}
-                  step={0.1}
-                  className="w-full"
-                  data-testid="temperature-slider"
-                />
-                <div className="text-xs text-slate-500 mt-1">
-                  Controls randomness (0 = focused, 1 = creative)
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium text-slate-700 mb-2 block">
-                  Max Tokens: {maxTokens[0]}
-                </label>
-                <Slider
-                  value={maxTokens}
-                  onValueChange={setMaxTokens}
-                  max={4000}
-                  min={50}
-                  step={50}
-                  className="w-full"
-                  data-testid="max-tokens-slider"
-                />
-                <div className="text-xs text-slate-500 mt-1">
-                  Maximum response length
-                </div>
-              </div>
+          {/* Left Sidebar - Model Selection & Settings */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Model Selector */}
+            <ModelSelector
+              selectedModel={selectedModel}
+              onModelChange={setSelectedModel}
+              modelType="text"
+              className=""
+              data-testid="model-selector"
+            />
 
-              {!apiKey && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <p className="text-xs text-amber-800">
-                    No API key configured. Add your A4F API key in 
-                    <Link to="/settings" className="font-medium text-amber-900 underline ml-1">
-                      Settings
-                    </Link>
-                  </p>
+            {/* Settings Panel */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center space-x-2">
+                  <Settings2 className="w-5 h-5" />
+                  <span>Parameters</span>
+                </CardTitle>
+                <CardDescription>Fine-tune model behavior</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Conversation Mode */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Conversation Mode
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant={conversationMode === "single" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setConversationMode("single")}
+                      className="text-xs"
+                    >
+                      <MessageSquare className="w-3 h-3 mr-1" />
+                      Single
+                    </Button>
+                    <Button
+                      variant={conversationMode === "conversation" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setConversationMode("conversation")}
+                      className="text-xs"
+                    >
+                      <Bot className="w-3 h-3 mr-1" />
+                      Chat
+                    </Button>
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1">
+                    {conversationMode === "single" ? "Each message is independent" : "Maintains conversation context"}
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+
+                {/* System Prompt */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    System Prompt
+                  </label>
+                  <Textarea
+                    value={systemPrompt}
+                    onChange={(e) => setSystemPrompt(e.target.value)}
+                    placeholder="You are a helpful assistant..."
+                    className="min-h-20 text-xs"
+                  />
+                  <div className="text-xs text-slate-500 mt-1">
+                    Set the AI's personality and behavior
+                  </div>
+                </div>
+                
+                {/* Temperature */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Temperature: {temperature[0]}
+                  </label>
+                  <Slider
+                    value={temperature}
+                    onValueChange={setTemperature}
+                    max={2}
+                    min={0}
+                    step={0.1}
+                    className="w-full"
+                    data-testid="temperature-slider"
+                  />
+                  <div className="text-xs text-slate-500 mt-1">
+                    Controls creativity (0 = focused, 2 = very creative)
+                  </div>
+                </div>
+                
+                {/* Max Tokens */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Max Tokens: {maxTokens[0]}
+                  </label>
+                  <Slider
+                    value={maxTokens}
+                    onValueChange={setMaxTokens}
+                    max={4000}
+                    min={50}
+                    step={50}
+                    className="w-full"
+                    data-testid="max-tokens-slider"
+                  />
+                  <div className="text-xs text-slate-500 mt-1">
+                    Maximum response length
+                  </div>
+                </div>
+
+                {/* Top P */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Top P: {topP[0]}
+                  </label>
+                  <Slider
+                    value={topP}
+                    onValueChange={setTopP}
+                    max={1}
+                    min={0}
+                    step={0.1}
+                    className="w-full"
+                  />
+                  <div className="text-xs text-slate-500 mt-1">
+                    Nucleus sampling threshold
+                  </div>
+                </div>
+
+                {/* Frequency Penalty */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Frequency Penalty: {frequencyPenalty[0]}
+                  </label>
+                  <Slider
+                    value={frequencyPenalty}
+                    onValueChange={setFrequencyPenalty}
+                    max={2}
+                    min={-2}
+                    step={0.1}
+                    className="w-full"
+                  />
+                  <div className="text-xs text-slate-500 mt-1">
+                    Reduces repetition of frequent tokens
+                  </div>
+                </div>
+
+                {/* Presence Penalty */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Presence Penalty: {presencePenalty[0]}
+                  </label>
+                  <Slider
+                    value={presencePenalty}
+                    onValueChange={setPresencePenalty}
+                    max={2}
+                    min={-2}
+                    step={0.1}
+                    className="w-full"
+                  />
+                  <div className="text-xs text-slate-500 mt-1">
+                    Reduces repetition of any tokens
+                  </div>
+                </div>
+
+                {!apiKey && (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-xs text-amber-800">
+                      No API key configured. Add your A4F API key in 
+                      <Link to="/settings" className="font-medium text-amber-900 underline ml-1">
+                        Settings
+                      </Link>
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Chat Area */}
           <Card className="lg:col-span-3">
