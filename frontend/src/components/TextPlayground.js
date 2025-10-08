@@ -135,7 +135,19 @@ const TextPlayground = () => {
 
   const clearChat = () => {
     setMessages([]);
+    setError(null);
     toast.success("Chat cleared!");
+  };
+
+  const handleRetry = () => {
+    if (prompt) {
+      handleSubmit({ preventDefault: () => {} });
+    }
+  };
+
+  const handleSwitchModel = () => {
+    // Focus on model selector (you could scroll to it or highlight it)
+    document.querySelector('[data-testid="model-selector"]')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const exportChat = () => {
