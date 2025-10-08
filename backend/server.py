@@ -99,6 +99,7 @@ class AudioModelRequest(BaseModel):
 class VideoModelRequest(BaseModel):
     model_id: str
     prompt: str
+    provider_id: Optional[str] = None  # Selected provider ID
     duration: Optional[int] = 10  # Duration in seconds
     resolution: Optional[str] = "1024x576"  # Common: 1024x576, 1280x720, 1920x1080
     fps: Optional[int] = 24  # Frames per second
