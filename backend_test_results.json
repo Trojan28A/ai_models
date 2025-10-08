@@ -1,7 +1,7 @@
 {
   "total_tests": 18,
-  "passed_tests": 17,
-  "success_rate": 94.44444444444444,
+  "passed_tests": 18,
+  "success_rate": 100.0,
   "critical_success": true,
   "a4f_integration_success": true,
   "detailed_results": [
@@ -85,14 +85,14 @@
     {
       "test_name": "Chat Endpoint (Real A4F API)",
       "success": true,
-      "details": "Response length: 148, Is mock: False",
+      "details": "Response length: 119, Is mock: False",
       "expected_status": null,
       "actual_status": null
     },
     {
       "test_name": "Image Generation Endpoint (Real A4F API)",
       "success": true,
-      "details": "Image URL: https://api.a4f.co/v1/images/serve/f5732108973b46d..., Is mock: False, Valid URL: True",
+      "details": "Image URL: https://api.a4f.co/v1/images/serve/0f5a5041cc964ec..., Is mock: False, Valid URL: True",
       "expected_status": null,
       "actual_status": null
     },
@@ -119,8 +119,8 @@
     },
     {
       "test_name": "Plan Restriction Enforcement",
-      "success": false,
-      "details": "Plan restriction properly enforced: False, Error: API call failed: {\"error\":{\"message\":\"You have exceeded your requests per minute limit of 5. Please ...",
+      "success": true,
+      "details": "Plan restriction properly enforced: True",
       "expected_status": null,
       "actual_status": null
     },
