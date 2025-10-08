@@ -22,6 +22,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTier, setSelectedTier] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [apiKey, setApiKey] = useState("");
 
   const fetchModels = async () => {
