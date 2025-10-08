@@ -272,15 +272,17 @@
 
 ## metadata:
   created_by: "main_agent"
-  version: "1.0"
-  test_sequence: 1
+  version: "2.0"
+  test_sequence: 2
   run_ui: false
 
 ## test_plan:
   current_focus:
-    - "Enhanced error handling and user feedback"
-    - "Advanced text generation parameters"
-    - "Enhanced image generation options"
+    - "ModelSelector search functionality"
+    - "Provider switching for models with multiple providers"
+    - "Enhanced Image Playground options and API integration"
+    - "Audio Playground real API integration with options"
+    - "Video Playground real API integration with options"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
