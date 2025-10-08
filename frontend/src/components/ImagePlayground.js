@@ -51,36 +51,45 @@ const ImagePlayground = () => {
 
   const handleGenerate = async (e) => {
     e.preventDefault();
-    if (!prompt.trim()) return;
+    if (!prompt.trim() || !selectedModel) return;
 
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API}/generate-image`, {
-        model_id: model?.name || "default",
+      const payload = {
+        model_id: selectedModel?.name || "default",
+        provider_id: selectedModel?.selectedProvider?.id || undefined,
         prompt: prompt,
+        negative_prompt: negativePrompt || undefined,
+        aspect_ratio: aspectRatio,
+        quality: quality,
+        style: style || undefined,
+        cfg_scale: cfgScale[0],
+        steps: steps[0],
+        seed: seed ? parseInt(seed) : undefined,
         api_key: apiKey || undefined,
-      });
-
-      const newImage = {
-        id: Date.now(),
-        prompt: prompt,
-        url: response.data.image_url,
-        model: model?.name || "Unknown",
-        timestamp: new Date().toLocaleTimeString(),
-        ...response.data,
       };
 
-      setGeneratedImages(prev => [newImage, ...prev]);
-      
-      if (response.data.error) {
-        toast.error(response.data.error);
-      } else {
+      const response = await axios.post(`${API}/generate-image`, payload);
+
+      if (response.data.success) {
+        const newImage = {
+          id: Date.now(),
+          prompt: prompt,
+          url: response.data.image_url,
+          model: selectedModel?.name || "Unknown",
+          timestamp: new Date().toLocaleTimeString(),
+          ...response.data,
+        };
+
+        setGeneratedImages(prev => [newImage, ...prev]);
         toast.success("Image generated successfully!");
+      } else if (response.data.error) {
+        toast.error(response.data.error.message || "Failed to generate image");
       }
     } catch (error) {
       console.error("Error:", error);
-      toast.error("Failed to generate image");
+      toast.error(error.response?.data?.error?.message || "Failed to generate image");
     } finally {
       setLoading(false);
     }
