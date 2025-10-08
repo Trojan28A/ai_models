@@ -579,7 +579,7 @@ async def generate_image(request: ImageModelRequest):
             }
         
         # Get the full model ID with provider prefix
-        full_model_id = await get_full_model_id(request.model_id)
+        full_model_id = await get_full_model_id(request.model_id, request.provider_id)
         
         # Convert aspect ratio to size if needed
         if request.aspect_ratio and request.aspect_ratio != "custom":
