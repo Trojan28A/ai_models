@@ -220,20 +220,46 @@ async def chat_with_model(request: ModelRequest):
         if not api_key:
             return {"error": "No API key provided. Please add your A4F API key in settings."}
         
-        # For now, return a mock response since we need to implement the actual A4F chat API
-        return {
-            "response": f"This is a mock response for model {request.model_id}. Prompt: {request.prompt}",
-            "model": request.model_id,
-            "usage": {
-                "prompt_tokens": len(request.prompt.split()),
-                "completion_tokens": 20,
-                "total_tokens": len(request.prompt.split()) + 20
-            }
+        # Make real API call to A4F
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
         }
+        
+        payload = {
+            "model": request.model_id,
+            "messages": [{"role": "user", "content": request.prompt}],
+            "temperature": request.temperature,
+            "max_tokens": request.max_tokens
+        }
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                "https://api.a4f.co/v1/chat/completions", 
+                headers=headers, 
+                json=payload
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if "choices" in data and len(data["choices"]) > 0:
+                        return {
+                            "response": data["choices"][0]["message"]["content"],
+                            "model": request.model_id,
+                            "usage": data.get("usage", {
+                                "prompt_tokens": len(request.prompt.split()),
+                                "completion_tokens": 50,
+                                "total_tokens": len(request.prompt.split()) + 50
+                            })
+                        }
+                    else:
+                        return {"error": "No response from model"}
+                else:
+                    error_text = await response.text()
+                    return {"error": f"API call failed: {error_text}"}
     
     except Exception as e:
         logger.error(f"Error in chat: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error in chat: {str(e)}")
+        return {"error": f"Error in chat: {str(e)}"}
 
 @api_router.post("/generate-image")
 async def generate_image(request: ModelRequest):
