@@ -387,9 +387,13 @@ def parse_a4f_error(error_response: str) -> Dict[str, Any]:
             "action": "retry"
         }
 
-async def get_full_model_id(model_name: str):
+async def get_full_model_id(model_name: str, provider_id: str = None):
     """Get the full model ID with provider prefix from A4F API"""
     try:
+        # If provider_id is already provided and looks like a full ID (contains /), use it directly
+        if provider_id and "/" in provider_id:
+            return provider_id
+            
         # First try to fetch all models to find the correct provider prefix
         plans = ["free", "basic", "pro"]
         for plan in plans:
@@ -406,10 +410,16 @@ async def get_full_model_id(model_name: str):
                         if "models" in data:
                             for model in data["models"]:
                                 if model.get("name") == model_name:
-                                    # Return the first available provider
+                                    # If specific provider_id requested, try to find it
+                                    if provider_id and model.get("proxy_providers"):
+                                        for provider in model["proxy_providers"]:
+                                            if provider.get("id") == provider_id or provider.get("id", "").startswith(provider_id):
+                                                return provider.get("id")
+                                    
+                                    # Return the first available provider if no specific one requested
                                     if model.get("proxy_providers"):
-                                        provider_id = model["proxy_providers"][0]["id"]
-                                        return provider_id
+                                        provider_id_found = model["proxy_providers"][0]["id"]
+                                        return provider_id_found
         
         # If no provider found, try the name as-is (might already have prefix)
         return model_name
