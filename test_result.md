@@ -222,6 +222,54 @@
         - agent: "main"
         - comment: "IMPLEMENTED: Created custom Select component with dropdown functionality, keyboard navigation support, and proper styling to support model selection dropdown."
 
+  - task: "Enhanced ModelSelector with search and provider switching"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/ModelSelector.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "IMPLEMENTED: Added search functionality (filters by model name), provider display in model dropdown, provider switching dropdown for models with multiple providers, provider info display in selected model details. Shows provider name next to model description."
+
+  - task: "Enhanced ImagePlayground with all options"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/ImagePlayground.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "IMPLEMENTED: Complete redesign with ModelSelector integration, advanced options UI (aspect ratio, quality, style, negative prompt, CFG scale, steps, seed). All options connected to backend API with provider_id support. 4-column layout with sidebar for options."
+
+  - task: "Enhanced AudioPlayground with ModelSelector and options"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/AudioPlayground.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "IMPLEMENTED: Complete rewrite with ModelSelector integration, audio options UI (voice selection: alloy/echo/fable/onyx/nova/shimmer, speed slider 0.25x-4.0x, language selection, format selection: mp3/opus/aac/flac/wav). Connected to real backend API with provider_id support. Replaced placeholder implementation."
+
+  - task: "Enhanced VideoPlayground with ModelSelector and options"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/VideoPlayground.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "IMPLEMENTED: Complete rewrite with ModelSelector integration, video options UI (aspect ratio, resolution selection: 1024x576 to 4K, duration input, FPS selection: 24/30/60/120, style input). Connected to real backend API with provider_id support. Replaced placeholder implementation."
+
 ## metadata:
   created_by: "main_agent"
   version: "1.0"
