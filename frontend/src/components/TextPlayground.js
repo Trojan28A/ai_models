@@ -17,12 +17,22 @@ const API = `${BACKEND_URL}/api`;
 
 const TextPlayground = () => {
   const location = useLocation();
-  const model = location.state?.model;
+  const initialModel = location.state?.model;
+  const [selectedModel, setSelectedModel] = useState(initialModel);
   const [messages, setMessages] = useState([]);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
+  // Enhanced parameters
+  const [systemPrompt, setSystemPrompt] = useState("");
   const [temperature, setTemperature] = useState([0.7]);
   const [maxTokens, setMaxTokens] = useState([1000]);
+  const [topP, setTopP] = useState([1.0]);
+  const [frequencyPenalty, setFrequencyPenalty] = useState([0.0]);
+  const [presencePenalty, setPresencePenalty] = useState([0.0]);
+  const [conversationMode, setConversationMode] = useState("single"); // single, conversation
+  
   const [apiKey, setApiKey] = useState("");
   const messagesEndRef = useRef(null);
 
