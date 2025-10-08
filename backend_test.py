@@ -267,6 +267,111 @@ class AIModelsHubTester:
 
         return create_success and get_success
 
+    def test_different_model_tiers(self):
+        """Test chat with models from different tiers"""
+        # Test models from different tiers
+        test_models = [
+            ("gpt-4o-mini", "free"),  # Free tier model
+            ("claude-3-haiku", "basic"),  # Basic tier model  
+            ("gpt-4o", "pro")  # Pro tier model
+        ]
+        
+        all_success = True
+        for model_id, tier in test_models:
+            try:
+                response = requests.post(f"{self.api_url}/chat", 
+                                       json={
+                                           "model_id": model_id,
+                                           "prompt": "Say hello in one sentence",
+                                           "temperature": 0.5,
+                                           "max_tokens": 50
+                                       }, 
+                                       timeout=30)
+                success = response.status_code == 200
+                
+                if success:
+                    data = response.json()
+                    has_response = 'response' in data and not 'error' in data
+                    details = f"Model: {model_id} ({tier} tier), Has response: {has_response}"
+                    self.log_test(f"Chat with {tier.upper()} tier model", has_response, details)
+                    if not has_response:
+                        all_success = False
+                else:
+                    self.log_test(f"Chat with {tier.upper()} tier model", False, 
+                                f"Status: {response.status_code}", 200, response.status_code)
+                    all_success = False
+                    
+            except Exception as e:
+                self.log_test(f"Chat with {tier.upper()} tier model", False, f"Exception: {str(e)}")
+                all_success = False
+        
+        return all_success
+
+    def test_invalid_model_error_handling(self):
+        """Test error handling with invalid model names"""
+        try:
+            response = requests.post(f"{self.api_url}/chat", 
+                                   json={
+                                       "model_id": "invalid-model-name-12345",
+                                       "prompt": "This should fail",
+                                       "temperature": 0.7,
+                                       "max_tokens": 100
+                                   }, 
+                                   timeout=30)
+            success = response.status_code == 200
+            
+            if success:
+                data = response.json()
+                has_error = 'error' in data
+                details = f"Has error field: {has_error}"
+                if has_error:
+                    error_msg = data['error']
+                    details += f", Error: {error_msg}"
+                self.log_test("Invalid Model Error Handling", has_error, details)
+                return has_error
+            else:
+                # Non-200 status is also acceptable for invalid model
+                self.log_test("Invalid Model Error Handling", True, 
+                            f"Properly returned error status: {response.status_code}")
+                return True
+                
+        except Exception as e:
+            self.log_test("Invalid Model Error Handling", False, f"Exception: {str(e)}")
+            return False
+
+    def test_api_key_authentication(self):
+        """Test that API key is being used correctly for authentication"""
+        # First test without API key (should fail or return error)
+        try:
+            # Delete any existing API key
+            requests.delete(f"{self.api_url}/api-keys/a4f", timeout=10)
+            
+            response = requests.post(f"{self.api_url}/chat", 
+                                   json={
+                                       "model_id": "gpt-4o-mini",
+                                       "prompt": "This should require API key",
+                                       "temperature": 0.7,
+                                       "max_tokens": 50
+                                   }, 
+                                   timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                has_error = 'error' in data
+                error_mentions_key = has_error and 'api key' in data['error'].lower()
+                self.log_test("No API Key Error Handling", error_mentions_key, 
+                            f"Error mentions API key: {error_mentions_key}")
+                return error_mentions_key
+            else:
+                # Non-200 status is acceptable when no API key
+                self.log_test("No API Key Error Handling", True, 
+                            f"Properly returned error status: {response.status_code}")
+                return True
+                
+        except Exception as e:
+            self.log_test("No API Key Error Handling", False, f"Exception: {str(e)}")
+            return False
+
     def run_all_tests(self):
         """Run all backend tests"""
         print("🚀 Starting AI Models Hub Backend Tests")
