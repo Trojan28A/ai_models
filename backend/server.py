@@ -347,9 +347,12 @@ async def chat_with_model(request: ModelRequest):
                     user_friendly_error = parse_a4f_error(error_text)
                     return {"error": user_friendly_error, "status_code": response.status}
     
+    except aiohttp.ClientError as e:
+        logger.error(f"Network error in chat: {str(e)}")
+        return {"error": "🌐 Network error. Please check your internet connection and try again."}
     except Exception as e:
         logger.error(f"Error in chat: {str(e)}")
-        return {"error": f"Error in chat: {str(e)}"}
+        return {"error": f"⚠️ Unexpected error: {str(e)}"}
 
 @api_router.post("/generate-image")
 async def generate_image(request: ModelRequest):
