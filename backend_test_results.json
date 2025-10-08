@@ -1,9 +1,10 @@
 {
-  "total_tests": 18,
-  "passed_tests": 18,
-  "success_rate": 100.0,
+  "total_tests": 30,
+  "passed_tests": 21,
+  "success_rate": 70.0,
   "critical_success": true,
-  "a4f_integration_success": true,
+  "enhanced_features_success": false,
+  "a4f_integration_success": false,
   "detailed_results": [
     {
       "test_name": "Root API Endpoint",
@@ -76,23 +77,107 @@
       "actual_status": 200
     },
     {
-      "test_name": "No API Key Error Handling",
+      "test_name": "Invalid API Key Error",
+      "success": false,
+      "details": "Type: http_error, Has all fields: True",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Non-existent Model Error",
       "success": true,
-      "details": "Error mentions API key: True",
+      "details": "Type: model_not_found, Has all fields: True",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "No API Key Error",
+      "success": true,
+      "details": "Type: no_api_key, Has all fields: True",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Basic Enhanced Chat",
+      "success": true,
+      "details": "Has all fields: True, Response length: 3254, Real: True",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Chat with System Prompt",
+      "success": true,
+      "details": "Has all fields: True, Response length: 1852, Real: True",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Chat with Conversation History",
+      "success": true,
+      "details": "Has all fields: True, Response length: 235, Real: True",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Chat with Advanced Parameters",
+      "success": true,
+      "details": "Has all fields: True, Response length: 3271, Real: True",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Basic Enhanced Image Generation",
+      "success": false,
+      "details": "Structured Error: http_error - \u274c API Error: An unexpected error occurred on our server.",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Image with Aspect Ratio",
+      "success": false,
+      "details": "Structured Error: http_error - \u274c API Error: An unexpected error occurred on our server.",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Image with Quality and Style",
+      "success": false,
+      "details": "Structured Error: http_error - \u274c API Error: An unexpected error occurred on our server.",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Image with Negative Prompt",
+      "success": false,
+      "details": "Structured Error: http_error - \u274c API Error: An unexpected error occurred on our server.",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "Stable Diffusion with Advanced Parameters",
+      "success": false,
+      "details": "Structured Error: model_not_found - \u274c Model 'model' not found or unavailable.",
+      "expected_status": null,
+      "actual_status": null
+    },
+    {
+      "test_name": "No API Key Error Handling",
+      "success": false,
+      "details": "Exception: 'dict' object has no attribute 'lower'",
       "expected_status": null,
       "actual_status": null
     },
     {
       "test_name": "Chat Endpoint (Real A4F API)",
       "success": true,
-      "details": "Response length: 119, Is mock: False",
+      "details": "Response length: 150, Is mock: False",
       "expected_status": null,
       "actual_status": null
     },
     {
       "test_name": "Image Generation Endpoint (Real A4F API)",
-      "success": true,
-      "details": "Image URL: https://api.a4f.co/v1/images/serve/0f5a5041cc964ec..., Is mock: False, Valid URL: True",
+      "success": false,
+      "details": "API Error: {'type': 'http_error', 'message': '\u274c API Error: An unexpected error occurred on our server.', 'suggestion': 'Please try again or check your request parameters.', 'action': 'retry'}",
       "expected_status": null,
       "actual_status": null
     },
@@ -113,21 +198,21 @@
     {
       "test_name": "Chat with qwen-2.5-72b",
       "success": true,
-      "details": "Model: qwen-2.5-72b, Real response: True, Length: 29",
+      "details": "Model: qwen-2.5-72b, Real response: True, Length: 44",
       "expected_status": null,
       "actual_status": null
     },
     {
       "test_name": "Plan Restriction Enforcement",
-      "success": true,
-      "details": "Plan restriction properly enforced: True",
+      "success": false,
+      "details": "Plan restriction properly enforced: False",
       "expected_status": null,
       "actual_status": null
     },
     {
       "test_name": "Invalid Model Error Handling",
       "success": true,
-      "details": "Has error field: True, Error: API call failed: {\"detail\":{\"error\":{\"message\":\"Error: Model 'invalid-model-name-12345' not found. Check the model name or view available models: https://api.a4f.co/v1/models Docs: https://a4f.co/docs\",\"type\":\"invalid_request_error\",\"param\":\"model\",\"code\":\"provider_prefix_missing_or_model_not_found\"}}}",
+      "details": "Has error field: True, Error: {'type': 'model_not_found', 'message': \"\u274c Model 'model' not found or unavailable.\", 'suggestion': 'Please select a different model from the dropdown.', 'action': 'switch_model'}",
       "expected_status": null,
       "actual_status": null
     }
