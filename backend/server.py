@@ -310,6 +310,9 @@ async def generate_image(request: ModelRequest):
         if not api_key:
             return {"error": "No API key provided. Please add your A4F API key in settings."}
         
+        # Get the full model ID with provider prefix
+        full_model_id = await get_full_model_id(request.model_id)
+        
         # Make real API call to A4F for image generation
         headers = {
             "Authorization": f"Bearer {api_key}",
@@ -317,7 +320,7 @@ async def generate_image(request: ModelRequest):
         }
         
         payload = {
-            "model": request.model_id,
+            "model": full_model_id,
             "prompt": request.prompt,
             "n": 1,
             "size": "512x512"
