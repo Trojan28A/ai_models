@@ -271,8 +271,14 @@ const ModelSelector = ({ selectedModel, onModelChange, modelType = "all", classN
                 <span className="text-slate-600">Type:</span>
                 <div className="font-medium">{selectedModelData.type || 'Unknown'}</div>
               </div>
-              {selectedModelData.context_window && (
+              {currentProvider && (
                 <div>
+                  <span className="text-slate-600">Provider:</span>
+                  <div className="font-medium text-blue-600">{currentProvider.id?.split('/')?.[0] || 'Unknown'}</div>
+                </div>
+              )}
+              {selectedModelData.context_window && (
+                <div className="col-span-2">
                   <span className="text-slate-600">Context:</span>
                   <div className="font-medium">{selectedModelData.context_window.toLocaleString()} tokens</div>
                 </div>
@@ -300,6 +306,24 @@ const ModelSelector = ({ selectedModel, onModelChange, modelType = "all", classN
                       +{selectedModelData.features.length - 4} more
                     </Badge>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Show all providers if multiple available */}
+            {availableProviders.length > 1 && (
+              <div>
+                <span className="text-slate-600 text-sm">Available Providers:</span>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {availableProviders.map((provider, idx) => (
+                    <Badge 
+                      key={idx} 
+                      variant={provider.id === currentProvider?.id ? "default" : "outline"} 
+                      className="text-xs"
+                    >
+                      {provider.id?.split('/')?.[0]}
+                    </Badge>
+                  ))}
                 </div>
               </div>
             )}
