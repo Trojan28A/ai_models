@@ -150,33 +150,53 @@ class AIModelsHubTester:
 
         return save_success and get_success and delete_success
 
-    def test_chat_endpoint(self):
-        """Test the mocked chat endpoint"""
+    def test_chat_endpoint_real_api(self):
+        """Test the chat endpoint with real A4F API"""
+        # First save the API key
+        api_key = "ddc-a4f-e3ce624cd8c148bea8d2d373ba29aa3d"
         try:
+            # Save API key first
+            requests.post(f"{self.api_url}/api-keys", 
+                         json={"api_key": api_key, "provider": "a4f"}, 
+                         timeout=10)
+            
+            # Test with deepseek-v3 model as specified in the request
             response = requests.post(f"{self.api_url}/chat", 
                                    json={
-                                       "model_id": "test-model",
-                                       "prompt": "Hello, this is a test",
+                                       "model_id": "deepseek-v3",
+                                       "prompt": "Hello, how are you?",
                                        "temperature": 0.7,
                                        "max_tokens": 100
                                    }, 
-                                   timeout=10)
+                                   timeout=30)
             success = response.status_code == 200
             
             if success:
                 data = response.json()
                 has_response = 'response' in data
-                has_usage = 'usage' in data
-                details = f"Has response: {has_response}, Has usage: {has_usage}"
-                self.log_test("Chat Endpoint (Mocked)", has_response and has_usage, details)
-                return has_response and has_usage
+                has_error = 'error' in data
+                
+                if has_error:
+                    self.log_test("Chat Endpoint (Real A4F API)", False, 
+                                f"API Error: {data['error']}")
+                    return False
+                elif has_response:
+                    # Check if response looks like real AI content (not mock)
+                    response_text = data['response']
+                    is_mock = "mock" in response_text.lower() or "placeholder" in response_text.lower()
+                    details = f"Response length: {len(response_text)}, Is mock: {is_mock}"
+                    self.log_test("Chat Endpoint (Real A4F API)", not is_mock and len(response_text) > 10, details)
+                    return not is_mock and len(response_text) > 10
+                else:
+                    self.log_test("Chat Endpoint (Real A4F API)", False, "No response field in data")
+                    return False
             else:
-                self.log_test("Chat Endpoint (Mocked)", False, 
+                self.log_test("Chat Endpoint (Real A4F API)", False, 
                             f"Status: {response.status_code}", 200, response.status_code)
                 return False
                 
         except Exception as e:
-            self.log_test("Chat Endpoint (Mocked)", False, f"Exception: {str(e)}")
+            self.log_test("Chat Endpoint (Real A4F API)", False, f"Exception: {str(e)}")
             return False
 
     def test_image_generation_endpoint(self):
