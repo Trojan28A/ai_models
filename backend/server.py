@@ -89,6 +89,7 @@ class ImageModelRequest(BaseModel):
 class AudioModelRequest(BaseModel):
     model_id: str
     prompt: str
+    provider_id: Optional[str] = None  # Selected provider ID
     voice: Optional[str] = "alloy"  # Common voices: alloy, echo, fable, onyx, nova, shimmer
     duration: Optional[int] = 30  # Duration in seconds
     format: Optional[str] = "mp3"  # mp3, wav, flac
