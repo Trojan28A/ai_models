@@ -206,6 +206,60 @@ async def get_all_models():
         logger.error(f"Error fetching all models: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error fetching all models: {str(e)}")
 
+def parse_a4f_error(error_response: str) -> str:
+    """Parse A4F API error response and return user-friendly message"""
+    try:
+        if isinstance(error_response, str):
+            error_data = json.loads(error_response)
+        else:
+            error_data = error_response
+            
+        # Handle different A4F error types
+        if "detail" in error_data and "error" in error_data["detail"]:
+            error_info = error_data["detail"]["error"]
+            error_code = error_info.get("code", "")
+            error_message = error_info.get("message", "")
+            error_type = error_info.get("type", "")
+            
+            # Model not found or invalid
+            if "provider_prefix_missing_or_model_not_found" in error_code:
+                return f"❌ Model '{error_info.get('param', 'unknown')}' not found or unavailable. Please select a different model."
+                
+            # Rate limiting
+            elif "rate_limit" in error_code.lower() or "quota" in error_message.lower():
+                return "⏱️ Rate limit exceeded. You've hit your daily usage quota for this model. Please try again later or use a different model."
+                
+            # Model unavailable/down
+            elif "unavailable" in error_message.lower() or "down" in error_message.lower():
+                return "🚫 This model is temporarily unavailable or under maintenance. Please try a different model."
+                
+            # Authentication errors
+            elif "unauthorized" in error_type.lower() or "auth" in error_code.lower():
+                return "🔐 Authentication failed. Please check your API key in Settings."
+                
+            # Insufficient credits/payment required
+            elif "credit" in error_message.lower() or "payment" in error_message.lower() or "billing" in error_message.lower():
+                return "💳 Insufficient credits or payment required. Please check your A4F account billing status."
+                
+            # Model access restricted
+            elif "access" in error_message.lower() or "permission" in error_message.lower():
+                return "🔒 Access denied to this model. You may need to upgrade your A4F plan to use this model."
+                
+            # Server errors
+            elif "internal_server_error" in error_code or error_type == "api_error":
+                return "🔧 A4F service is experiencing issues. Please try again in a few minutes."
+                
+            # Generic error with original message
+            else:
+                return f"⚠️ Error: {error_message}"
+        
+        # Fallback for unknown error format
+        return f"❌ API Error: {str(error_response)}"
+        
+    except Exception as e:
+        logger.warning(f"Error parsing A4F error response: {str(e)}")
+        return f"❌ Unexpected error: {str(error_response)}"
+
 async def get_full_model_id(model_name: str):
     """Get the full model ID with provider prefix from A4F API"""
     try:
