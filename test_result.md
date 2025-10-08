@@ -277,11 +277,14 @@
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: true
         - agent: "main"
         - comment: "IMPLEMENTED: Added ImageModelRequest with aspect_ratio, quality, size, style, cfg_scale, steps, seed, and negative_prompt support. Added aspect_ratio_to_size conversion function and model-specific parameter handling for Stable Diffusion."
+        - working: true
+        - agent: "testing"
+        - comment: "VERIFIED: Enhanced image generation tested with imagen-3 model (free tier). All advanced parameters working: aspect_ratio (16:9), quality (high), style, negative_prompt. Response structure includes success=true, image_url, aspect_ratio, quality as specified. Real image URLs generated from api.a4f.co. Note: midjourney-v7 experiencing A4F server errors (500), stable-diffusion-3 model not found, but core functionality verified with working models."
 
   - task: "Audio and Video generation endpoints"
     implemented: true
