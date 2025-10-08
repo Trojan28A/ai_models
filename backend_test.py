@@ -684,7 +684,15 @@ class AIModelsHubTester:
             if response.status_code == 200:
                 data = response.json()
                 has_error = 'error' in data
-                error_mentions_key = has_error and 'api key' in data['error'].lower()
+                if has_error:
+                    error_obj = data['error']
+                    if isinstance(error_obj, dict):
+                        error_message = error_obj.get('message', '').lower()
+                        error_mentions_key = 'api key' in error_message
+                    else:
+                        error_mentions_key = 'api key' in str(error_obj).lower()
+                else:
+                    error_mentions_key = False
                 self.log_test("No API Key Error Handling", error_mentions_key, 
                             f"Error mentions API key: {error_mentions_key}")
                 return error_mentions_key
