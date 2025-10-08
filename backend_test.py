@@ -374,7 +374,7 @@ class AIModelsHubTester:
 
     def run_all_tests(self):
         """Run all backend tests"""
-        print("🚀 Starting AI Models Hub Backend Tests")
+        print("🚀 Starting AI Models Hub Backend Tests - A4F API Integration")
         print(f"Testing against: {self.base_url}")
         print("=" * 60)
 
@@ -388,30 +388,49 @@ class AIModelsHubTester:
         # Test API key management
         api_key_ok = self.test_api_key_management()
         
-        # Test mocked endpoints
-        chat_ok = self.test_chat_endpoint()
-        image_ok = self.test_image_generation_endpoint()
-        
         # Test status endpoints
         status_ok = self.test_status_endpoints()
+        
+        print("\n🔥 CRITICAL A4F API INTEGRATION TESTS:")
+        print("-" * 40)
+        
+        # Test A4F API authentication and real responses
+        auth_ok = self.test_api_key_authentication()
+        chat_real_ok = self.test_chat_endpoint_real_api()
+        image_real_ok = self.test_image_generation_endpoint_real_api()
+        tiers_ok = self.test_different_model_tiers()
+        error_handling_ok = self.test_invalid_model_error_handling()
 
         print("=" * 60)
         print(f"📊 Tests completed: {self.tests_passed}/{self.tests_run} passed")
         
-        # Determine overall success
+        # Determine overall success - focus on A4F API integration
         critical_tests = [root_ok, models_ok, plans_ok]
-        critical_success = all(critical_tests)
+        a4f_integration_tests = [chat_real_ok, image_real_ok, auth_ok]
         
-        if critical_success:
-            print("✅ All critical backend tests passed!")
+        critical_success = all(critical_tests)
+        a4f_success = all(a4f_integration_tests)
+        
+        print(f"\n🎯 A4F API Integration Status:")
+        print(f"   Chat API: {'✅' if chat_real_ok else '❌'}")
+        print(f"   Image API: {'✅' if image_real_ok else '❌'}")
+        print(f"   Authentication: {'✅' if auth_ok else '❌'}")
+        print(f"   Model Tiers: {'✅' if tiers_ok else '❌'}")
+        print(f"   Error Handling: {'✅' if error_handling_ok else '❌'}")
+        
+        if critical_success and a4f_success:
+            print("\n✅ All critical tests passed! A4F API integration is working correctly.")
         else:
-            print("❌ Some critical backend tests failed!")
+            print("\n❌ Some critical tests failed!")
+            if not a4f_success:
+                print("   🚨 A4F API integration issues detected!")
             
         return {
             "total_tests": self.tests_run,
             "passed_tests": self.tests_passed,
             "success_rate": (self.tests_passed / self.tests_run) * 100 if self.tests_run > 0 else 0,
             "critical_success": critical_success,
+            "a4f_integration_success": a4f_success,
             "detailed_results": self.test_results
         }
 
