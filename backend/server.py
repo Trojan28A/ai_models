@@ -206,6 +206,38 @@ async def get_all_models():
         logger.error(f"Error fetching all models: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error fetching all models: {str(e)}")
 
+async def get_full_model_id(model_name: str):
+    """Get the full model ID with provider prefix from A4F API"""
+    try:
+        # First try to fetch all models to find the correct provider prefix
+        plans = ["free", "basic", "pro"]
+        for plan in plans:
+            url = f"https://www.a4f.co/api/get-display-models?plan={plan}"
+            headers = {
+                'accept': '*/*',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'
+            }
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, headers=headers) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        if "models" in data:
+                            for model in data["models"]:
+                                if model.get("name") == model_name:
+                                    # Return the first available provider
+                                    if model.get("proxy_providers"):
+                                        provider_id = model["proxy_providers"][0]["id"]
+                                        return provider_id
+        
+        # If no provider found, try the name as-is (might already have prefix)
+        return model_name
+        
+    except Exception as e:
+        logger.warning(f"Error getting full model ID: {str(e)}")
+        # Fallback to the original name
+        return model_name
+
 @api_router.post("/chat")
 async def chat_with_model(request: ModelRequest):
     """Chat with a text model"""
@@ -220,6 +252,9 @@ async def chat_with_model(request: ModelRequest):
         if not api_key:
             return {"error": "No API key provided. Please add your A4F API key in settings."}
         
+        # Get the full model ID with provider prefix
+        full_model_id = await get_full_model_id(request.model_id)
+        
         # Make real API call to A4F
         headers = {
             "Authorization": f"Bearer {api_key}",
@@ -227,7 +262,7 @@ async def chat_with_model(request: ModelRequest):
         }
         
         payload = {
-            "model": request.model_id,
+            "model": full_model_id,
             "messages": [{"role": "user", "content": request.prompt}],
             "temperature": request.temperature,
             "max_tokens": request.max_tokens
