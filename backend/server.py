@@ -421,8 +421,8 @@ async def get_full_model_id(model_name: str):
         return model_name
 
 @api_router.post("/chat")
-async def chat_with_model(request: ModelRequest):
-    """Chat with a text model"""
+async def chat_with_model(request: TextModelRequest):
+    """Chat with a text model with enhanced options"""
     try:
         # Get API key from request or stored keys
         api_key = request.api_key
@@ -432,10 +432,31 @@ async def chat_with_model(request: ModelRequest):
                 api_key = stored_key["api_key"]
         
         if not api_key:
-            return {"error": "No API key provided. Please add your A4F API key in settings."}
+            return {
+                "error": {
+                    "type": "no_api_key",
+                    "message": "🔐 No API key configured.",
+                    "suggestion": "Please add your A4F API key in Settings to use the models.",
+                    "action": "add_api_key"
+                }
+            }
         
         # Get the full model ID with provider prefix
         full_model_id = await get_full_model_id(request.model_id)
+        
+        # Build messages array with conversation history and system prompt
+        messages = []
+        
+        # Add system prompt if provided
+        if request.system_prompt:
+            messages.append({"role": "system", "content": request.system_prompt})
+        
+        # Add conversation history if provided
+        if request.conversation_history:
+            messages.extend(request.conversation_history)
+        
+        # Add current user message
+        messages.append({"role": "user", "content": request.prompt})
         
         # Make real API call to A4F
         headers = {
@@ -445,42 +466,70 @@ async def chat_with_model(request: ModelRequest):
         
         payload = {
             "model": full_model_id,
-            "messages": [{"role": "user", "content": request.prompt}],
+            "messages": messages,
             "temperature": request.temperature,
-            "max_tokens": request.max_tokens
+            "max_tokens": request.max_tokens,
+            "top_p": request.top_p,
+            "frequency_penalty": request.frequency_penalty,
+            "presence_penalty": request.presence_penalty,
+            "stream": request.stream
         }
         
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 "https://api.a4f.co/v1/chat/completions", 
                 headers=headers, 
-                json=payload
+                json=payload,
+                timeout=aiohttp.ClientTimeout(total=60)  # Longer timeout for complex requests
             ) as response:
                 if response.status == 200:
                     data = await response.json()
                     if "choices" in data and len(data["choices"]) > 0:
                         return {
+                            "success": True,
                             "response": data["choices"][0]["message"]["content"],
                             "model": request.model_id,
                             "usage": data.get("usage", {
                                 "prompt_tokens": len(request.prompt.split()),
                                 "completion_tokens": 50,
                                 "total_tokens": len(request.prompt.split()) + 50
-                            })
+                            }),
+                            "finish_reason": data["choices"][0].get("finish_reason", "stop")
                         }
                     else:
-                        return {"error": "No response from model"}
+                        return {
+                            "error": {
+                                "type": "no_response",
+                                "message": "🤔 No response received from the model.",
+                                "suggestion": "Please try again or use a different model.",
+                                "action": "retry"
+                            }
+                        }
                 else:
                     error_text = await response.text()
-                    user_friendly_error = parse_a4f_error(error_text)
-                    return {"error": user_friendly_error, "status_code": response.status}
+                    error_info = parse_a4f_error(error_text)
+                    return {"error": error_info, "status_code": response.status}
     
     except aiohttp.ClientError as e:
         logger.error(f"Network error in chat: {str(e)}")
-        return {"error": "🌐 Network error. Please check your internet connection and try again."}
+        return {
+            "error": {
+                "type": "network_error",
+                "message": "🌐 Network connection failed.",
+                "suggestion": "Please check your internet connection and try again.",
+                "action": "check_connection"
+            }
+        }
     except Exception as e:
         logger.error(f"Error in chat: {str(e)}")
-        return {"error": f"⚠️ Unexpected error: {str(e)}"}
+        return {
+            "error": {
+                "type": "unexpected_error",
+                "message": f"⚠️ Unexpected error occurred: {str(e)[:100]}",
+                "suggestion": "Please try again or contact support if the issue persists.",
+                "action": "retry"
+            }
+        }
 
 @api_router.post("/generate-image")
 async def generate_image(request: ModelRequest):
