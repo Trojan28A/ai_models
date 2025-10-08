@@ -166,90 +166,207 @@ const ImagePlayground = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Generation Panel */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle className="text-lg">Generate Image</CardTitle>
-              <CardDescription>Create images from text prompts</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleGenerate} className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Left Sidebar - Model Selection & Settings */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Model Selector */}
+            <ModelSelector
+              selectedModel={selectedModel}
+              onModelChange={setSelectedModel}
+              modelType="image"
+              className=""
+            />
+
+            {/* Generation Options */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center space-x-2">
+                  <Settings2 className="w-5 h-5" />
+                  <span>Options</span>
+                </CardTitle>
+                <CardDescription>Fine-tune image generation</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Aspect Ratio */}
                 <div>
                   <label className="text-sm font-medium text-slate-700 mb-2 block">
-                    Prompt
+                    Aspect Ratio
                   </label>
-                  <Textarea
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Describe the image you want to generate..."
-                    className="min-h-32 resize-none"
-                    disabled={loading}
-                    data-testid="image-prompt-input"
+                  <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1:1">1:1 (Square)</SelectItem>
+                      <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
+                      <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
+                      <SelectItem value="4:3">4:3 (Standard)</SelectItem>
+                      <SelectItem value="3:4">3:4 (Portrait)</SelectItem>
+                      <SelectItem value="3:2">3:2 (Classic)</SelectItem>
+                      <SelectItem value="2:3">2:3 (Portrait)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Quality */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Quality
+                  </label>
+                  <Select value={quality} onValueChange={setQuality}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="standard">Standard</SelectItem>
+                      <SelectItem value="high">High (HD)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Style */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Style (Optional)
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="e.g., vivid, natural, artistic..."
+                    value={style}
+                    onChange={(e) => setStyle(e.target.value)}
+                  />
+                </div>
+
+                {/* CFG Scale */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    CFG Scale: {cfgScale[0]}
+                  </label>
+                  <Slider
+                    value={cfgScale}
+                    onValueChange={setCfgScale}
+                    max={20}
+                    min={1}
+                    step={0.5}
+                    className="w-full"
                   />
                   <div className="text-xs text-slate-500 mt-1">
-                    {prompt.length} characters
+                    How strictly to follow prompt
                   </div>
                 </div>
 
-                <Button 
-                  type="submit" 
-                  disabled={loading || !prompt.trim()}
-                  className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
-                  data-testid="generate-image-btn"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <ImageIcon className="w-4 h-4 mr-2" />
-                      Generate Image
-                    </>
-                  )}
-                </Button>
-              </form>
-
-              {!apiKey && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg mt-4">
-                  <p className="text-xs text-amber-800">
-                    No API key configured. Add your A4F API key in 
-                    <Link to="/settings" className="font-medium text-amber-900 underline ml-1">
-                      Settings
-                    </Link>
-                  </p>
-                </div>
-              )}
-
-              {/* Model Info */}
-              {model && (
-                <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-                  <h3 className="font-medium text-slate-900 mb-2">Model Details</h3>
-                  <div className="space-y-2 text-sm text-slate-600">
-                    <div><strong>Name:</strong> {model.name}</div>
-                    <div><strong>Type:</strong> {model.type}</div>
-                    {model.context_window && (
-                      <div><strong>Context:</strong> {model.context_window.toLocaleString()} tokens</div>
-                    )}
-                    {model.features && (
-                      <div>
-                        <strong>Features:</strong>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {model.features.map((feature, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
-                              {feature.replace('_', ' ')}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                {/* Steps */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Steps: {steps[0]}
+                  </label>
+                  <Slider
+                    value={steps}
+                    onValueChange={setSteps}
+                    max={50}
+                    min={10}
+                    step={5}
+                    className="w-full"
+                  />
+                  <div className="text-xs text-slate-500 mt-1">
+                    More steps = higher quality (slower)
                   </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+
+                {/* Seed */}
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Seed (Optional)
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="Random if empty"
+                    value={seed}
+                    onChange={(e) => setSeed(e.target.value)}
+                  />
+                  <div className="text-xs text-slate-500 mt-1">
+                    Use same seed for consistent results
+                  </div>
+                </div>
+
+                {!apiKey && (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-xs text-amber-800">
+                      No API key configured. Add your A4F API key in 
+                      <Link to="/settings" className="font-medium text-amber-900 underline ml-1">
+                        Settings
+                      </Link>
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Generation Area */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Prompt Input Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Generate Image</CardTitle>
+                <CardDescription>Create images from text prompts</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleGenerate} className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 mb-2 block">
+                      Prompt
+                    </label>
+                    <Textarea
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      placeholder="Describe the image you want to generate..."
+                      className="min-h-24 resize-none"
+                      disabled={loading}
+                      data-testid="image-prompt-input"
+                    />
+                    <div className="text-xs text-slate-500 mt-1">
+                      {prompt.length} characters
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 mb-2 block">
+                      Negative Prompt (Optional)
+                    </label>
+                    <Textarea
+                      value={negativePrompt}
+                      onChange={(e) => setNegativePrompt(e.target.value)}
+                      placeholder="What to avoid in the image..."
+                      className="min-h-20 resize-none"
+                      disabled={loading}
+                    />
+                    <div className="text-xs text-slate-500 mt-1">
+                      Specify what you don't want in the image
+                    </div>
+                  </div>
+
+                  <Button 
+                    type="submit" 
+                    disabled={loading || !prompt.trim() || !selectedModel}
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
+                    data-testid="generate-image-btn"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <ImageIcon className="w-4 h-4 mr-2" />
+                        Generate Image
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
 
           {/* Generated Images Gallery */}
           <Card className="lg:col-span-2">
