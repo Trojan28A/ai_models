@@ -680,7 +680,7 @@ async def generate_image(request: ImageModelRequest):
 
 @api_router.post("/generate-audio")
 async def generate_audio(request: AudioModelRequest):
-    """Generate audio with a model (placeholder for future implementation)"""
+    """Generate audio with enhanced options"""
     try:
         # Get API key from request or stored keys
         api_key = request.api_key
@@ -699,16 +699,73 @@ async def generate_audio(request: AudioModelRequest):
                 }
             }
         
-        # Check if audio generation is supported (placeholder)
-        return {
-            "error": {
-                "type": "feature_not_implemented",
-                "message": "🎵 Audio generation is not yet supported.",
-                "suggestion": "This feature is coming soon. Please check back later.",
-                "action": "wait_for_feature"
-            }
+        # Get the full model ID with provider prefix
+        full_model_id = await get_full_model_id(request.model_id, request.provider_id)
+        
+        # Make real API call to A4F for audio generation
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
         }
         
+        payload = {
+            "model": full_model_id,
+            "input": request.prompt,
+            "voice": request.voice,
+            "speed": request.speed,
+            "response_format": request.format
+        }
+        
+        # Add language if provided
+        if request.language:
+            payload["language"] = request.language
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                "https://api.a4f.co/v1/audio/speech",
+                json=payload,
+                headers=headers
+            ) as response:
+                if response.status == 200:
+                    # For audio, the response might be binary or a URL
+                    content_type = response.headers.get('content-type', '')
+                    
+                    if 'application/json' in content_type:
+                        data = await response.json()
+                        return {
+                            "success": True,
+                            "audio_url": data.get("url") or data.get("audio_url"),
+                            "model": request.model_id,
+                            "voice": request.voice,
+                            "format": request.format,
+                            "duration": data.get("duration"),
+                        }
+                    else:
+                        # Binary audio response - would need to save and return URL
+                        # For now, return error suggesting URL-based response
+                        return {
+                            "error": {
+                                "type": "response_format_error",
+                                "message": "🎵 Audio response format not supported.",
+                                "suggestion": "Please try a different audio model that returns URL responses.",
+                                "action": "switch_model"
+                            }
+                        }
+                else:
+                    error_text = await response.text()
+                    error_info = parse_a4f_error(error_text)
+                    return {"error": error_info, "status_code": response.status}
+    
+    except aiohttp.ClientError as e:
+        logger.error(f"Network error in audio generation: {str(e)}")
+        return {
+            "error": {
+                "type": "network_error",
+                "message": "🌐 Network connection failed during audio generation.",
+                "suggestion": "Please check your internet connection and try again.",
+                "action": "check_connection"
+            }
+        }
     except Exception as e:
         logger.error(f"Error in audio generation: {str(e)}")
         return {
