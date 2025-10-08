@@ -85,6 +85,7 @@ const TextPlayground = () => {
 
       const response = await axios.post(`${API}/chat`, {
         model_id: selectedModel?.name || "default",
+        provider_id: selectedModel?.selectedProvider?.id || undefined,
         prompt: prompt,
         system_prompt: systemPrompt || undefined,
         temperature: temperature[0],
