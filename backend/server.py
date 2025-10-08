@@ -58,6 +58,51 @@ class ModelRequest(BaseModel):
     max_tokens: Optional[int] = 1000
     api_key: Optional[str] = None
 
+class TextModelRequest(BaseModel):
+    model_id: str
+    prompt: str
+    system_prompt: Optional[str] = None
+    temperature: Optional[float] = 0.7
+    max_tokens: Optional[int] = 1000
+    top_p: Optional[float] = 1.0
+    frequency_penalty: Optional[float] = 0.0
+    presence_penalty: Optional[float] = 0.0
+    stream: Optional[bool] = False
+    conversation_history: Optional[List[Dict[str, str]]] = []
+    api_key: Optional[str] = None
+
+class ImageModelRequest(BaseModel):
+    model_id: str
+    prompt: str
+    negative_prompt: Optional[str] = None
+    aspect_ratio: Optional[str] = "1:1"  # 1:1, 16:9, 9:16, 4:3, 3:4
+    quality: Optional[str] = "standard"  # standard, high
+    size: Optional[str] = "1024x1024"  # Common sizes: 512x512, 1024x1024, 1792x1024
+    style: Optional[str] = None  # natural, vivid, artistic
+    cfg_scale: Optional[float] = 7.0  # For Stable Diffusion
+    steps: Optional[int] = 20  # Generation steps
+    seed: Optional[int] = None
+    api_key: Optional[str] = None
+
+class AudioModelRequest(BaseModel):
+    model_id: str
+    prompt: str
+    voice: Optional[str] = "alloy"  # Common voices: alloy, echo, fable, onyx, nova, shimmer
+    duration: Optional[int] = 30  # Duration in seconds
+    format: Optional[str] = "mp3"  # mp3, wav, flac
+    speed: Optional[float] = 1.0  # Playback speed
+    api_key: Optional[str] = None
+
+class VideoModelRequest(BaseModel):
+    model_id: str
+    prompt: str
+    duration: Optional[int] = 10  # Duration in seconds
+    resolution: Optional[str] = "1024x576"  # Common: 1024x576, 1280x720, 1920x1080
+    fps: Optional[int] = 24  # Frames per second
+    aspect_ratio: Optional[str] = "16:9"  # 16:9, 9:16, 1:1, 4:3
+    style: Optional[str] = None
+    api_key: Optional[str] = None
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
