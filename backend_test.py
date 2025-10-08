@@ -150,6 +150,274 @@ class AIModelsHubTester:
 
         return save_success and get_success and delete_success
 
+    def test_enhanced_error_handling(self):
+        """Test enhanced error handling with structured responses"""
+        api_key = "ddc-a4f-e3ce624cd8c148bea8d2d373ba29aa3d"
+        
+        # Save API key first
+        requests.post(f"{self.api_url}/api-keys", 
+                     json={"api_key": api_key, "provider": "a4f"}, 
+                     timeout=10)
+        
+        test_cases = [
+            {
+                "name": "Invalid API Key Error",
+                "payload": {"model_id": "deepseek-v3", "prompt": "Test", "api_key": "invalid-key-123"},
+                "expected_error_type": "auth_error"
+            },
+            {
+                "name": "Non-existent Model Error", 
+                "payload": {"model_id": "non-existent-model-xyz", "prompt": "Test"},
+                "expected_error_type": "model_not_found"
+            },
+            {
+                "name": "No API Key Error",
+                "payload": {"model_id": "deepseek-v3", "prompt": "Test"},
+                "expected_error_type": "no_api_key",
+                "delete_key_first": True
+            }
+        ]
+        
+        all_success = True
+        for test_case in test_cases:
+            try:
+                # Delete API key if needed for this test
+                if test_case.get("delete_key_first"):
+                    requests.delete(f"{self.api_url}/api-keys/a4f", timeout=10)
+                
+                response = requests.post(f"{self.api_url}/chat", 
+                                       json=test_case["payload"], 
+                                       timeout=30)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if 'error' in data:
+                        error = data['error']
+                        has_required_fields = all(field in error for field in ['type', 'message', 'suggestion', 'action'])
+                        correct_type = error.get('type') == test_case["expected_error_type"]
+                        
+                        details = f"Type: {error.get('type')}, Has all fields: {has_required_fields}"
+                        success = has_required_fields and correct_type
+                        self.log_test(test_case["name"], success, details)
+                        if not success:
+                            all_success = False
+                    else:
+                        self.log_test(test_case["name"], False, "No error field in response")
+                        all_success = False
+                else:
+                    self.log_test(test_case["name"], False, f"Status: {response.status_code}")
+                    all_success = False
+                    
+                # Restore API key for next tests
+                if test_case.get("delete_key_first"):
+                    requests.post(f"{self.api_url}/api-keys", 
+                                 json={"api_key": api_key, "provider": "a4f"}, 
+                                 timeout=10)
+                    
+            except Exception as e:
+                self.log_test(test_case["name"], False, f"Exception: {str(e)}")
+                all_success = False
+        
+        return all_success
+
+    def test_enhanced_text_generation(self):
+        """Test enhanced text generation with advanced parameters"""
+        api_key = "ddc-a4f-e3ce624cd8c148bea8d2d373ba29aa3d"
+        
+        # Save API key first
+        requests.post(f"{self.api_url}/api-keys", 
+                     json={"api_key": api_key, "provider": "a4f"}, 
+                     timeout=10)
+        
+        test_cases = [
+            {
+                "name": "Basic Enhanced Chat",
+                "payload": {
+                    "model_id": "deepseek-v3",
+                    "prompt": "Explain quantum computing",
+                    "temperature": 0.8,
+                    "max_tokens": 500
+                }
+            },
+            {
+                "name": "Chat with System Prompt",
+                "payload": {
+                    "model_id": "deepseek-v3", 
+                    "prompt": "What is physics?",
+                    "system_prompt": "You are a physics professor",
+                    "temperature": 0.7,
+                    "max_tokens": 300
+                }
+            },
+            {
+                "name": "Chat with Conversation History",
+                "payload": {
+                    "model_id": "deepseek-v3",
+                    "prompt": "Continue our discussion",
+                    "conversation_history": [
+                        {"role": "user", "content": "Hello"},
+                        {"role": "assistant", "content": "Hi! I'm here to help with physics."}
+                    ],
+                    "temperature": 0.8,
+                    "max_tokens": 400
+                }
+            },
+            {
+                "name": "Chat with Advanced Parameters",
+                "payload": {
+                    "model_id": "deepseek-v3",
+                    "prompt": "Write a creative story",
+                    "system_prompt": "You are a creative writer",
+                    "temperature": 0.9,
+                    "max_tokens": 500,
+                    "top_p": 0.9,
+                    "frequency_penalty": 0.1,
+                    "presence_penalty": 0.1,
+                    "conversation_history": [
+                        {"role": "user", "content": "I love fantasy stories"},
+                        {"role": "assistant", "content": "Great! I'll write something magical for you."}
+                    ]
+                }
+            }
+        ]
+        
+        all_success = True
+        for test_case in test_cases:
+            try:
+                response = requests.post(f"{self.api_url}/chat", 
+                                       json=test_case["payload"], 
+                                       timeout=60)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if 'error' in data:
+                        self.log_test(test_case["name"], False, f"API Error: {data['error']}")
+                        all_success = False
+                    elif 'success' in data and data['success']:
+                        # Check for enhanced response structure
+                        has_required_fields = all(field in data for field in ['success', 'response', 'model', 'usage', 'finish_reason'])
+                        response_text = data.get('response', '')
+                        is_real_response = len(response_text) > 20 and 'mock' not in response_text.lower()
+                        
+                        details = f"Has all fields: {has_required_fields}, Response length: {len(response_text)}, Real: {is_real_response}"
+                        success = has_required_fields and is_real_response
+                        self.log_test(test_case["name"], success, details)
+                        if not success:
+                            all_success = False
+                    else:
+                        self.log_test(test_case["name"], False, "No success field or success=false")
+                        all_success = False
+                else:
+                    self.log_test(test_case["name"], False, f"Status: {response.status_code}")
+                    all_success = False
+                    
+            except Exception as e:
+                self.log_test(test_case["name"], False, f"Exception: {str(e)}")
+                all_success = False
+        
+        return all_success
+
+    def test_enhanced_image_generation(self):
+        """Test enhanced image generation with advanced options"""
+        api_key = "ddc-a4f-e3ce624cd8c148bea8d2d373ba29aa3d"
+        
+        # Save API key first
+        requests.post(f"{self.api_url}/api-keys", 
+                     json={"api_key": api_key, "provider": "a4f"}, 
+                     timeout=10)
+        
+        test_cases = [
+            {
+                "name": "Basic Enhanced Image Generation",
+                "payload": {
+                    "model_id": "midjourney-v7",
+                    "prompt": "A futuristic city at sunset"
+                }
+            },
+            {
+                "name": "Image with Aspect Ratio",
+                "payload": {
+                    "model_id": "midjourney-v7",
+                    "prompt": "A beautiful landscape",
+                    "aspect_ratio": "16:9"
+                }
+            },
+            {
+                "name": "Image with Quality and Style",
+                "payload": {
+                    "model_id": "midjourney-v7",
+                    "prompt": "A majestic mountain range",
+                    "aspect_ratio": "4:3",
+                    "quality": "high",
+                    "style": "cinematic"
+                }
+            },
+            {
+                "name": "Image with Negative Prompt",
+                "payload": {
+                    "model_id": "midjourney-v7",
+                    "prompt": "A serene forest scene",
+                    "aspect_ratio": "1:1",
+                    "quality": "high",
+                    "style": "natural",
+                    "negative_prompt": "blurry, low quality, dark"
+                }
+            },
+            {
+                "name": "Stable Diffusion with Advanced Parameters",
+                "payload": {
+                    "model_id": "stable-diffusion-3",
+                    "prompt": "A cyberpunk cityscape",
+                    "aspect_ratio": "16:9",
+                    "quality": "high",
+                    "negative_prompt": "blurry, distorted",
+                    "style": "futuristic"
+                }
+            }
+        ]
+        
+        all_success = True
+        for test_case in test_cases:
+            try:
+                response = requests.post(f"{self.api_url}/generate-image", 
+                                       json=test_case["payload"], 
+                                       timeout=120)  # Longer timeout for image generation
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if 'error' in data:
+                        # Check if it's a structured error
+                        error = data['error']
+                        if isinstance(error, dict) and 'type' in error:
+                            self.log_test(test_case["name"], False, f"Structured Error: {error['type']} - {error.get('message', '')}")
+                        else:
+                            self.log_test(test_case["name"], False, f"API Error: {error}")
+                        all_success = False
+                    elif 'success' in data and data['success']:
+                        # Check for enhanced response structure
+                        required_fields = ['success', 'image_url', 'aspect_ratio']
+                        has_required_fields = all(field in data for field in required_fields)
+                        image_url = data.get('image_url', '')
+                        is_valid_url = image_url.startswith(('http://', 'https://')) and 'mock' not in image_url.lower()
+                        
+                        details = f"Has all fields: {has_required_fields}, Valid URL: {is_valid_url}, URL: {image_url[:50]}..."
+                        success = has_required_fields and is_valid_url
+                        self.log_test(test_case["name"], success, details)
+                        if not success:
+                            all_success = False
+                    else:
+                        self.log_test(test_case["name"], False, "No success field or success=false")
+                        all_success = False
+                else:
+                    self.log_test(test_case["name"], False, f"Status: {response.status_code}")
+                    all_success = False
+                    
+            except Exception as e:
+                self.log_test(test_case["name"], False, f"Exception: {str(e)}")
+                all_success = False
+        
+        return all_success
+
     def test_chat_endpoint_real_api(self):
         """Test the chat endpoint with real A4F API"""
         # First save the API key
