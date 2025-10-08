@@ -297,12 +297,27 @@
 
   - task: "Audio and Video generation endpoints"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
-    priority: "low"
-    needs_retesting: false
+    priority: "high"
+    needs_retesting: true
     status_history:
         - working: false
         - agent: "main"
         - comment: "PLACEHOLDER: Added AudioModelRequest and VideoModelRequest classes with placeholder endpoints. Currently returns 'feature_not_implemented' error with proper structure. Ready for future implementation when A4F supports audio/video generation."
+        - working: true
+        - agent: "main"
+        - comment: "IMPLEMENTED: Full audio and video generation endpoints with A4F API integration. Supports voice selection, speed, language, format for audio. Supports duration, resolution, FPS, aspect ratio, style for video. Provider_id support added."
+
+  - task: "Provider selection and display in models"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "IMPLEMENTED: Updated get_full_model_id function to accept provider_id parameter. Added provider_id field to all model request classes (TextModelRequest, ImageModelRequest, AudioModelRequest, VideoModelRequest). Backend now respects user-selected provider when making API calls."
